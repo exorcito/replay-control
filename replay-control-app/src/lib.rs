@@ -102,6 +102,7 @@ pub fn Shell(options: leptos::config::LeptosOptions) -> impl IntoView {
 #[component]
 pub fn App() -> impl IntoView {
     provide_i18n();
+    crate::components::theme_selector::init_theme();
 
     let update_state = RwSignal::new(replay_control_core::update::UpdateState::None);
     provide_context(update_state);

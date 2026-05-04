@@ -197,6 +197,18 @@ pub fn translate(key: Key) -> &'static str {
         Key::SkinSync => "Sincronizar con ReplayOS",
         Key::SkinSyncHint => "Al activarlo, el tema de la app sigue el ajuste de tema de ReplayOS.",
 
+        // Themes
+        Key::ThemeTitle => "Tema de la Web",
+        Key::ThemeDefault => "Predeterminado",
+        Key::ThemeLight => "Claro",
+        Key::ThemeAmber => "Ámbar CRT",
+        Key::ThemeGreen => "Verde CRT",
+        Key::ThemeMidnight => "Medianoche",
+        Key::ThemeRose => "Rosa",
+        Key::ThemeNord => "Nord",
+        Key::ThemeHighContrast => "Alto Contraste",
+        Key::ThemeActive => "Activo",
+
         // WiFi configuration
         Key::WifiTitle => "Configuración Wi-Fi",
         Key::WifiSsid => "Nombre de red (SSID)",

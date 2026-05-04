@@ -15,4 +15,5 @@ pub mod rom_list;
 pub mod setup_checklist;
 pub mod stat_card;
 pub mod system_card;
+pub mod theme_selector;
 pub mod video_section;

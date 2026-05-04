@@ -3,6 +3,7 @@ use leptos_router::components::A;
 use server_fn::ServerFnError;
 
 use crate::components::reboot_button::RebootButton;
+use crate::components::theme_selector::ThemeSelector;
 use crate::i18n::{Key, Locale, t, use_i18n};
 use crate::server_fns;
 use crate::util::format_size;
@@ -50,6 +51,11 @@ pub fn SettingsPage() -> impl IntoView {
                         <div class="settings-section-body">
                             <div class="menu-list">
                                 <MenuItem icon="\u{1F3A8}" label_key=Key::MoreSkin href=Some("/settings/skin") />
+                            </div>
+
+                            <div class="settings-inline-setting">
+                                <h4 class="settings-setting-title">{move || t(i18n.locale.get(), Key::ThemeTitle)}</h4>
+                                <ThemeSelector />
                             </div>
 
                             <div class="settings-inline-setting">

@@ -197,6 +197,18 @@ pub fn translate(key: Key) -> &'static str {
         Key::SkinSync => "Sync with ReplayOS",
         Key::SkinSyncHint => "When enabled, the app skin follows the ReplayOS skin setting.",
 
+        // Themes
+        Key::ThemeTitle => "Web UI Theme",
+        Key::ThemeDefault => "Default",
+        Key::ThemeLight => "Light",
+        Key::ThemeAmber => "Amber CRT",
+        Key::ThemeGreen => "Green CRT",
+        Key::ThemeMidnight => "Midnight",
+        Key::ThemeRose => "Rose",
+        Key::ThemeNord => "Nord",
+        Key::ThemeHighContrast => "High Contrast",
+        Key::ThemeActive => "Active",
+
         // WiFi configuration
         Key::WifiTitle => "Wi-Fi Configuration",
         Key::WifiSsid => "Network Name (SSID)",

@@ -185,6 +185,18 @@ pub enum Key {
     SkinSync,
     SkinSyncHint,
 
+    // Themes
+    ThemeTitle,
+    ThemeDefault,
+    ThemeLight,
+    ThemeAmber,
+    ThemeGreen,
+    ThemeMidnight,
+    ThemeRose,
+    ThemeNord,
+    ThemeHighContrast,
+    ThemeActive,
+
     // WiFi configuration
     WifiTitle,
     WifiSsid,

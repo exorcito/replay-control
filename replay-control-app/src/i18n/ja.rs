@@ -197,6 +197,18 @@ pub fn translate(key: Key) -> &'static str {
         Key::SkinSync => "RePlayOSと同期",
         Key::SkinSyncHint => "有効にすると、アプリのスキンがRePlayOSのスキン設定に従います。",
 
+        // Themes
+        Key::ThemeTitle => "Web UIテーマ",
+        Key::ThemeDefault => "デフォルト",
+        Key::ThemeLight => "ライト",
+        Key::ThemeAmber => "アンバーCRT",
+        Key::ThemeGreen => "グリーンCRT",
+        Key::ThemeMidnight => "ミッドナイト",
+        Key::ThemeRose => "ローズ",
+        Key::ThemeNord => "ノルド",
+        Key::ThemeHighContrast => "ハイコントラスト",
+        Key::ThemeActive => "アクティブ",
+
         // WiFi configuration
         Key::WifiTitle => "Wi-Fi設定",
         Key::WifiSsid => "ネットワーク名（SSID）",
