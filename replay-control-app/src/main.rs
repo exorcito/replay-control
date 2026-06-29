@@ -1077,6 +1077,7 @@ mod ssr {
         >();
         server_fn::axum::register_explicit::<replay_control_app::server_fns::GetMetadataPageSnapshot>(
         );
+        server_fn::axum::register_explicit::<replay_control_app::server_fns::GetStatsDashboard>();
     }
 
     pub async fn run() {
