@@ -915,4 +915,12 @@ pub enum Key {
     StorageUnavailable,
     StorageFallback,
     StorageProblem,
+    // HowLongToBeat
+    HltbTitle,
+    HltbFetch,
+    HltbFetching,
+    HltbNoData,
+    HltbMain,
+    HltbMainExtra,
+    HltbCompletionist,
 }
