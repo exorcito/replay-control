@@ -879,5 +879,13 @@ pub fn translate(key: Key) -> &'static str {
         Key::StorageProblem => {
             "ストレージの問題: {0}。利用可能な場合、Replay Control は引き続き最後にアクティブだったストレージを使用します。"
         }
+        // HowLongToBeat
+        Key::HltbTitle => "クリア時間",
+        Key::HltbFetch => "クリア時間を調べる",
+        Key::HltbFetching => "検索中...",
+        Key::HltbNoData => "HowLongToBeatにデータなし",
+        Key::HltbMain => "メインストーリー",
+        Key::HltbMainExtra => "メイン＋エクストラ",
+        Key::HltbCompletionist => "完全クリア",
     }
 }

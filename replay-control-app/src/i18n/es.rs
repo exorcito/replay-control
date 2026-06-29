@@ -893,5 +893,13 @@ pub fn translate(key: Key) -> &'static str {
         Key::StorageProblem => {
             "Problema de almacenamiento: {0}. Replay Control sigue usando el último almacenamiento activo si hay alguno disponible."
         }
+        // HowLongToBeat
+        Key::HltbTitle => "Cuánto dura",
+        Key::HltbFetch => "Buscar duración",
+        Key::HltbFetching => "Buscando...",
+        Key::HltbNoData => "Sin datos en HowLongToBeat",
+        Key::HltbMain => "Historia principal",
+        Key::HltbMainExtra => "Historia + extras",
+        Key::HltbCompletionist => "Completista",
     }
 }
