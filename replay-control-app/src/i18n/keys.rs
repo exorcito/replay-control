@@ -777,4 +777,18 @@ pub enum Key {
     StorageUnavailable,
     StorageFallback,
     StorageProblem,
+    // Game status / My Games
+    NavMyGames,
+    GameStatusTitle,
+    GameStatusWantToPlay,
+    GameStatusInProgress,
+    GameStatusCompleted,
+    GameStatusPlatinum,
+    MyGamesTitle,
+    MyGamesAll,
+    MyGamesWantToPlay,
+    MyGamesInProgress,
+    MyGamesCompleted,
+    MyGamesPlatinum,
+    MyGamesEmpty,
 }

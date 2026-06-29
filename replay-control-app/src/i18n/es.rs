@@ -893,5 +893,19 @@ pub fn translate(key: Key) -> &'static str {
         Key::StorageProblem => {
             "Problema de almacenamiento: {0}. Replay Control sigue usando el último almacenamiento activo si hay alguno disponible."
         }
+        // Game status / My Games
+        Key::NavMyGames => "Mis Juegos",
+        Key::GameStatusTitle => "Mi Progreso",
+        Key::GameStatusWantToPlay => "Quiero Jugar",
+        Key::GameStatusInProgress => "En Progreso",
+        Key::GameStatusCompleted => "Completado",
+        Key::GameStatusPlatinum => "Platino",
+        Key::MyGamesTitle => "Mis Juegos",
+        Key::MyGamesAll => "Todos",
+        Key::MyGamesWantToPlay => "Quiero Jugar",
+        Key::MyGamesInProgress => "En Progreso",
+        Key::MyGamesCompleted => "Completados",
+        Key::MyGamesPlatinum => "Platino",
+        Key::MyGamesEmpty => "Aún no hay juegos con este estado",
     }
 }

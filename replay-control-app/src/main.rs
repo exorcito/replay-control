@@ -1041,6 +1041,10 @@ mod ssr {
         >();
         server_fn::axum::register_explicit::<replay_control_app::server_fns::GetMetadataPageSnapshot>(
         );
+        server_fn::axum::register_explicit::<replay_control_app::server_fns::GetGameStatus>();
+        server_fn::axum::register_explicit::<replay_control_app::server_fns::SetGameStatus>();
+        server_fn::axum::register_explicit::<replay_control_app::server_fns::ClearGameStatus>();
+        server_fn::axum::register_explicit::<replay_control_app::server_fns::GetGamesByStatus>();
     }
 
     pub async fn run() {

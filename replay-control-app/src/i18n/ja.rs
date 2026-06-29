@@ -879,5 +879,19 @@ pub fn translate(key: Key) -> &'static str {
         Key::StorageProblem => {
             "ストレージの問題: {0}。利用可能な場合、Replay Control は引き続き最後にアクティブだったストレージを使用します。"
         }
+        // Game status / My Games
+        Key::NavMyGames => "マイゲーム",
+        Key::GameStatusTitle => "プレイ状況",
+        Key::GameStatusWantToPlay => "プレイ予定",
+        Key::GameStatusInProgress => "プレイ中",
+        Key::GameStatusCompleted => "クリア",
+        Key::GameStatusPlatinum => "コンプリート",
+        Key::MyGamesTitle => "マイゲーム",
+        Key::MyGamesAll => "すべて",
+        Key::MyGamesWantToPlay => "プレイ予定",
+        Key::MyGamesInProgress => "プレイ中",
+        Key::MyGamesCompleted => "クリア",
+        Key::MyGamesPlatinum => "コンプリート",
+        Key::MyGamesEmpty => "まだこの状態のゲームはありません",
     }
 }
