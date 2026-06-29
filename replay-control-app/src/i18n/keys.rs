@@ -777,4 +777,9 @@ pub enum Key {
     StorageUnavailable,
     StorageFallback,
     StorageProblem,
+    // Game notes
+    GameNotesTitle,
+    GameNotesPlaceholder,
+    GameNotesSave,
+    GameNotesSaving,
 }
