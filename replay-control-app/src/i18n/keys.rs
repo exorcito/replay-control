@@ -820,4 +820,10 @@ pub enum Key {
     MyGamesCompleted,
     MyGamesPlatinum,
     MyGamesEmpty,
+    // Achievements gallery + RA Web API key
+    AchievementsTitle,
+    AchievementsPoints,
+    AchievementsShowAll,
+    RaApiKeyLabel,
+    RaApiKeyHint,
 }
