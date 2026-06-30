@@ -894,5 +894,19 @@ pub fn translate(key: Key) -> &'static str {
         Key::StatsRatingCoverage => "評価",
         Key::StatsBoxartCoverage => "カバーアート",
         Key::StatsScreenshotCoverage => "スクリーンショット",
+        // Game status / My Games
+        Key::NavMyGames => "マイゲーム",
+        Key::GameStatusTitle => "プレイ状況",
+        Key::GameStatusWantToPlay => "プレイ予定",
+        Key::GameStatusInProgress => "プレイ中",
+        Key::GameStatusCompleted => "クリア",
+        Key::GameStatusPlatinum => "コンプリート",
+        Key::MyGamesTitle => "マイゲーム",
+        Key::MyGamesAll => "すべて",
+        Key::MyGamesWantToPlay => "プレイ予定",
+        Key::MyGamesInProgress => "プレイ中",
+        Key::MyGamesCompleted => "クリア",
+        Key::MyGamesPlatinum => "コンプリート",
+        Key::MyGamesEmpty => "まだこの状態のゲームはありません",
     }
 }

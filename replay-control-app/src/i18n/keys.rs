@@ -806,4 +806,18 @@ pub enum Key {
     StatsRatingCoverage,
     StatsBoxartCoverage,
     StatsScreenshotCoverage,
+    // Game status / My Games
+    NavMyGames,
+    GameStatusTitle,
+    GameStatusWantToPlay,
+    GameStatusInProgress,
+    GameStatusCompleted,
+    GameStatusPlatinum,
+    MyGamesTitle,
+    MyGamesAll,
+    MyGamesWantToPlay,
+    MyGamesInProgress,
+    MyGamesCompleted,
+    MyGamesPlatinum,
+    MyGamesEmpty,
 }
