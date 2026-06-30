@@ -855,5 +855,13 @@ pub fn translate(key: Key) -> &'static str {
         Key::GameNotesPlaceholder => "このゲームについてのメモを追加...",
         Key::GameNotesSave => "保存",
         Key::GameNotesSaving => "保存中...",
+        // HowLongToBeat
+        Key::HltbTitle => "クリア時間",
+        Key::HltbFetch => "クリア時間を調べる",
+        Key::HltbFetching => "検索中...",
+        Key::HltbNoData => "HowLongToBeatにデータなし",
+        Key::HltbMain => "メインストーリー",
+        Key::HltbMainExtra => "メイン＋エクストラ",
+        Key::HltbCompletionist => "完全クリア",
     }
 }

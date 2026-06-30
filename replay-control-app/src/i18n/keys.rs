@@ -767,4 +767,12 @@ pub enum Key {
     GameNotesPlaceholder,
     GameNotesSave,
     GameNotesSaving,
+    // HowLongToBeat
+    HltbTitle,
+    HltbFetch,
+    HltbFetching,
+    HltbNoData,
+    HltbMain,
+    HltbMainExtra,
+    HltbCompletionist,
 }
