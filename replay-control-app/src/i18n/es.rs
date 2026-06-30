@@ -864,5 +864,10 @@ pub fn translate(key: Key) -> &'static str {
         Key::ThemeNord => "Nord",
         Key::ThemeHighContrast => "Alto Contraste",
         Key::ThemeActive => "Activo",
+        // Game notes
+        Key::GameNotesTitle => "Notas",
+        Key::GameNotesPlaceholder => "Añade notas sobre este juego...",
+        Key::GameNotesSave => "Guardar",
+        Key::GameNotesSaving => "Guardando...",
     }
 }

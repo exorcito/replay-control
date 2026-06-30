@@ -762,4 +762,9 @@ pub enum Key {
     ThemeNord,
     ThemeHighContrast,
     ThemeActive,
+    // Game notes
+    GameNotesTitle,
+    GameNotesPlaceholder,
+    GameNotesSave,
+    GameNotesSaving,
 }

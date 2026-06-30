@@ -850,5 +850,10 @@ pub fn translate(key: Key) -> &'static str {
         Key::ThemeNord => "ノルド",
         Key::ThemeHighContrast => "ハイコントラスト",
         Key::ThemeActive => "アクティブ",
+        // Game notes
+        Key::GameNotesTitle => "メモ",
+        Key::GameNotesPlaceholder => "このゲームについてのメモを追加...",
+        Key::GameNotesSave => "保存",
+        Key::GameNotesSaving => "保存中...",
     }
 }
