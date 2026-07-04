@@ -85,6 +85,10 @@ Chronological timeline of changes to the Replay Control companion app for RePlay
 - Box art can fall back to an exact catalog-title match for non-arcade games such as Amiga WHDLoad archives, without replacing existing filename or hash matches.
 - Thumbnail-source download errors now include useful HTTP, GitHub request, and rate-limit diagnostics while redacting credentials and avoiding arbitrary response-body logging.
 
+### Added
+
+- Personal notes on the game detail page — a per-ROM textarea, saved with the button or Ctrl/Cmd+Enter, cleared automatically when the text is emptied.
+
 ---
 
 ## [1.2.0]
