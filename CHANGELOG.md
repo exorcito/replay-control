@@ -6,6 +6,10 @@ Chronological timeline of changes to the Replay Control companion app for RePlay
 
 ## [Unreleased]
 
+### Added
+
+- Personal notes on the game detail page — a per-ROM textarea, saved with the button or Ctrl/Cmd+Enter, cleared automatically when the text is emptied.
+
 ---
 
 ## [1.2.0]
