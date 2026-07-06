@@ -935,5 +935,14 @@ pub fn translate(key: Key) -> &'static str {
         Key::AchievementsShowAll => "Mostrar todos los logros",
         Key::RaApiKeyLabel => "Clave de API Web",
         Key::RaApiKeyHint => "Tu clave de API Web de RetroAchievements (solo lectura). La encontrarás en retroachievements.org/settings. Sirve para mostrar tus logros conseguidos.",
+
+        // HowLongToBeat
+        Key::HltbTitle => "Cuánto dura",
+        Key::HltbFetch => "Buscar duración",
+        Key::HltbFetching => "Buscando...",
+        Key::HltbNoData => "Sin datos en HowLongToBeat",
+        Key::HltbMain => "Historia principal",
+        Key::HltbMainExtra => "Historia + extras",
+        Key::HltbCompletionist => "Completista",
     }
 }

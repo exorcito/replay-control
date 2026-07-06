@@ -921,5 +921,14 @@ pub fn translate(key: Key) -> &'static str {
         Key::AchievementsShowAll => "すべての実績を表示",
         Key::RaApiKeyLabel => "Web APIキー",
         Key::RaApiKeyHint => "RetroAchievementsのWeb APIキー（読み取り専用）。retroachievements.org/settingsで確認できます。獲得した実績の表示に使います。",
+
+        // HowLongToBeat
+        Key::HltbTitle => "クリア時間",
+        Key::HltbFetch => "クリア時間を調べる",
+        Key::HltbFetching => "検索中...",
+        Key::HltbNoData => "HowLongToBeatにデータなし",
+        Key::HltbMain => "メインストーリー",
+        Key::HltbMainExtra => "メイン＋エクストラ",
+        Key::HltbCompletionist => "完全クリア",
     }
 }

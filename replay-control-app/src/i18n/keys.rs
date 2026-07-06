@@ -831,4 +831,13 @@ pub enum Key {
     AchievementsShowAll,
     RaApiKeyLabel,
     RaApiKeyHint,
+
+    // HowLongToBeat
+    HltbTitle,
+    HltbFetch,
+    HltbFetching,
+    HltbNoData,
+    HltbMain,
+    HltbMainExtra,
+    HltbCompletionist,
 }

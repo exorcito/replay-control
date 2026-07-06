@@ -925,5 +925,14 @@ pub fn translate(key: Key) -> &'static str {
         Key::AchievementsShowAll => "Show all achievements",
         Key::RaApiKeyLabel => "Web API Key",
         Key::RaApiKeyHint => "Your RetroAchievements Web API key (read-only). Find it at retroachievements.org/settings. Used to show your earned achievements.",
+
+        // HowLongToBeat
+        Key::HltbTitle => "How Long to Beat",
+        Key::HltbFetch => "Look up completion time",
+        Key::HltbFetching => "Fetching...",
+        Key::HltbNoData => "No data found on HowLongToBeat",
+        Key::HltbMain => "Main Story",
+        Key::HltbMainExtra => "Main + Extras",
+        Key::HltbCompletionist => "Completionist",
     }
 }
