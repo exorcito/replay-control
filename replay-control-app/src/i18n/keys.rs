@@ -47,6 +47,13 @@ pub enum Key {
     FavoritesAll,
     FavoritesRemoveConfirm,
 
+    // Collections (browse the _favorites folder tree)
+    CollectionsTitle,
+    CollectionsOpen,
+    CollectionsLoading,
+    CollectionsEmpty,
+    CollectionsGeneral,
+
     // Organize favorites
     OrganizeTitle,
     OrganizeDescription,
@@ -280,6 +287,7 @@ pub enum Key {
 
     // Game detail page
     GameDetailInfo,
+    GameDetailInCollections,
     GameDetailSystem,
     GameDetailFilename,
     GameDetailStorageSize,
