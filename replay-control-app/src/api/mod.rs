@@ -2025,6 +2025,7 @@ fn is_user_read_server_function(function: &str) -> bool {
             | "get_game_achievements"
             | "check_game_achievements"
             | "search_ra_games_api"
+            | "get_hltb_data"
     )
 }
 

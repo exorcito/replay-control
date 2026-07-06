@@ -292,6 +292,7 @@ pub fn register_server_fns() {
     server_fn::axum::register_explicit::<server_fns::CheckGameAchievements>();
     server_fn::axum::register_explicit::<server_fns::SearchRaGamesApi>();
     server_fn::axum::register_explicit::<server_fns::GetRaApiKey>();
+    server_fn::axum::register_explicit::<server_fns::GetHltbData>();
     server_fn::axum::register_explicit::<server_fns::GetLanguagePreference>();
     server_fn::axum::register_explicit::<server_fns::SaveLanguagePreference>();
     server_fn::axum::register_explicit::<server_fns::GetPreferredLanguages>();
