@@ -2019,6 +2019,7 @@ fn is_user_read_server_function(function: &str) -> bool {
             // admins) renders the "what's new" changelog from this.
             | "get_update_changelog"
             | "get_game_note"
+            | "get_stats_dashboard"
     )
 }
 
