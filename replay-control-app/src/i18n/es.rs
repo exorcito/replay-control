@@ -914,5 +914,20 @@ pub fn translate(key: Key) -> &'static str {
         Key::StatsRatingCoverage => "Valoración",
         Key::StatsBoxartCoverage => "Carátulas",
         Key::StatsScreenshotCoverage => "Capturas",
+
+        // Game status / My Games
+        Key::NavMyGames => "Mis Juegos",
+        Key::GameStatusTitle => "Mi Progreso",
+        Key::GameStatusWantToPlay => "Quiero Jugar",
+        Key::GameStatusInProgress => "En Progreso",
+        Key::GameStatusCompleted => "Completado",
+        Key::GameStatusPlatinum => "Platino",
+        Key::MyGamesTitle => "Mis Juegos",
+        Key::MyGamesAll => "Todos",
+        Key::MyGamesWantToPlay => "Quiero Jugar",
+        Key::MyGamesInProgress => "En Progreso",
+        Key::MyGamesCompleted => "Completados",
+        Key::MyGamesPlatinum => "Platino",
+        Key::MyGamesEmpty => "Aún no hay juegos con este estado",
     }
 }
