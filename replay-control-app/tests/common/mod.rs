@@ -284,6 +284,14 @@ pub fn register_server_fns() {
     server_fn::axum::register_explicit::<server_fns::SetGameNote>();
     server_fn::axum::register_explicit::<server_fns::ClearGameNote>();
     server_fn::axum::register_explicit::<server_fns::GetStatsDashboard>();
+    server_fn::axum::register_explicit::<server_fns::GetGameStatus>();
+    server_fn::axum::register_explicit::<server_fns::SetGameStatus>();
+    server_fn::axum::register_explicit::<server_fns::ClearGameStatus>();
+    server_fn::axum::register_explicit::<server_fns::GetGamesByStatus>();
+    server_fn::axum::register_explicit::<server_fns::GetGameAchievements>();
+    server_fn::axum::register_explicit::<server_fns::CheckGameAchievements>();
+    server_fn::axum::register_explicit::<server_fns::SearchRaGamesApi>();
+    server_fn::axum::register_explicit::<server_fns::GetRaApiKey>();
     server_fn::axum::register_explicit::<server_fns::GetLanguagePreference>();
     server_fn::axum::register_explicit::<server_fns::SaveLanguagePreference>();
     server_fn::axum::register_explicit::<server_fns::GetPreferredLanguages>();

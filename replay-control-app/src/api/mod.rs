@@ -2020,6 +2020,11 @@ fn is_user_read_server_function(function: &str) -> bool {
             | "get_update_changelog"
             | "get_game_note"
             | "get_stats_dashboard"
+            | "get_game_status"
+            | "get_games_by_status"
+            | "get_game_achievements"
+            | "check_game_achievements"
+            | "search_ra_games_api"
     )
 }
 
@@ -2146,6 +2151,8 @@ fn is_user_server_function(function: &str) -> bool {
                 | "remove_game_video"
                 | "set_game_note"
                 | "clear_game_note"
+                | "set_game_status"
+                | "clear_game_status"
                 | "download_manual"
                 | "delete_manual"
                 | "set_boxart_override"
