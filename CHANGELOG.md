@@ -6,6 +6,10 @@ Chronological timeline of changes to the Replay Control companion app for RePlay
 
 ## [Unreleased]
 
+### Added
+
+- Arcade board browsing now recognizes Psikyo, Psikyo SH-2, Sega Y Board, SSV, Kaneko Super Nova System, and Sega System SP hardware. (#147)
+
 ### Changed
 
 - **RePlayOS 1.8.0 is now the minimum supported version.** Skin sync follows RePlayOS's named global skin IDs instead of the removed numeric slots. Replay Control stores the same IDs for manual overrides, automatically reads older numeric Replay Control preferences, uses the REPLAY palette for a custom global skin, and ignores TV-only per-system overrides.
@@ -13,6 +17,8 @@ Chronological timeline of changes to the Replay Control companion app for RePlay
 
 ### Fixed
 
+- Naomi, Naomi 2, Atomiswave, and System SP games now use explicit per-ROM board data instead of inferring hardware from `GDS`/`GDL` text, correcting games such as Metal Slug 6, Virtua Striker 3, and Virtua Tennis. (#145, #146)
+- RePlayOS on-screen messages remember the last duration used instead of resetting to 3 seconds when the settings page is reopened. (#142)
 - PSP libraries now recognize all RePlayOS-supported files: `.elf`, `.iso`, `.cso`, `.prx`, `.pbp`, and `.chd`. Compressed `.zip` archives must still be extracted first.
 - PSP box art sources are now imported when upgrading an existing installation, and already-scanned games are rematched after the new source arrives instead of waiting for an unrelated ROM change.
 - Skin changes now reapply their palette when a browser reconnects after Replay Control restarts, so an open tab no longer keeps stale colors.
