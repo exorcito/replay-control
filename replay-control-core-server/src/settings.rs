@@ -14,6 +14,7 @@ use crate::storage::{RC_DIR, SETTINGS_FILE};
 use replay_control_core::error::Result;
 use replay_control_core::locale::Locale;
 use replay_control_core::rom_tags::RegionPreference;
+use replay_control_core::skins::SkinId;
 
 /// Resolved settings directory. Contains `settings.cfg`.
 #[derive(Debug, Clone)]
@@ -109,7 +110,7 @@ impl SettingsStore {
 /// avoiding repeated file I/O on every SSR render or server function call.
 #[derive(Debug, Clone)]
 pub struct UserPreferences {
-    pub skin: Option<u32>,
+    pub skin: Option<SkinId>,
     pub locale: Option<Locale>,
     pub region: RegionPreference,
     pub region_secondary: Option<RegionPreference>,
@@ -196,7 +197,7 @@ pub fn write_font_size(store: &SettingsStore, size: &str) -> Result<()> {
 /// Read the skin preference from settings.
 /// Returns `Some(index)` if the user has explicitly chosen a skin (sync off),
 /// or `None` if the key is absent (sync on — read from `replay.cfg` instead).
-pub fn read_skin(store: &SettingsStore) -> Option<u32> {
+pub fn read_skin(store: &SettingsStore) -> Option<SkinId> {
     store.load().skin()
 }
 
@@ -204,7 +205,7 @@ pub fn read_skin(store: &SettingsStore) -> Option<u32> {
 /// Pass `Some(index)` to store a specific skin (sync off).
 /// Pass `None` to clear the key (sync on — defer to `replay.cfg`).
 /// Creates the directory and file if they don't exist. Preserves other keys.
-pub fn write_skin(store: &SettingsStore, skin: Option<u32>) -> Result<()> {
+pub fn write_skin(store: &SettingsStore, skin: Option<SkinId>) -> Result<()> {
     let mut settings = store.load();
     settings.set_skin(skin);
     store.save(&settings)
@@ -670,15 +671,15 @@ mod tests {
     #[test]
     fn write_and_read_skin() {
         let store = test_store();
-        write_skin(&store, Some(5)).unwrap();
-        assert_eq!(read_skin(&store), Some(5));
+        write_skin(&store, Some(SkinId::new("mvs"))).unwrap();
+        assert_eq!(read_skin(&store), Some(SkinId::new("mvs")));
     }
 
     #[test]
     fn write_skin_none_clears() {
         let store = test_store();
-        write_skin(&store, Some(3)).unwrap();
-        assert_eq!(read_skin(&store), Some(3));
+        write_skin(&store, Some(SkinId::new("astro"))).unwrap();
+        assert_eq!(read_skin(&store), Some(SkinId::new("astro")));
         write_skin(&store, None).unwrap();
         assert_eq!(read_skin(&store), None);
     }
@@ -687,10 +688,10 @@ mod tests {
     fn skin_preserves_other_keys() {
         let store = test_store();
         write_region_preference(&store, RegionPreference::Japan).unwrap();
-        write_skin(&store, Some(7)).unwrap();
+        write_skin(&store, Some(SkinId::new("fantasy"))).unwrap();
 
         assert_eq!(read_region_preference(&store), RegionPreference::Japan);
-        assert_eq!(read_skin(&store), Some(7));
+        assert_eq!(read_skin(&store), Some(SkinId::new("fantasy")));
     }
 
     // --- Language preference tests ---

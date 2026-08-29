@@ -13,15 +13,15 @@ html {
 }
 
 :root {
-    --bg: #0f1115;
-    --surface: #1a1d23;
-    --surface-hover: #22262e;
-    --border: #2a2e36;
+    --bg: #101b32;
+    --surface: #162541;
+    --surface-hover: #1d3154;
+    --border: #065ab5;
     --border-subtle: rgba(255, 255, 255, 0.04);
-    --text: #e4e6ea;
-    --text-secondary: #8b8f96;
-    --accent: #6366f1;
-    --accent-hover: #818cf8;
+    --text: #edf4ff;
+    --text-secondary: #94a8c7;
+    --accent: #be1250;
+    --accent-hover: #d52b68;
     --accent-dim: color-mix(in srgb, var(--accent) 10%, transparent);
     --accent-glow: color-mix(in srgb, var(--accent) 20%, transparent);
     --accent-border: color-mix(in srgb, var(--accent) 30%, transparent);

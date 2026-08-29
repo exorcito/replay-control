@@ -119,9 +119,9 @@ pub fn waiting_page_html(state: &AppState) -> String {
 
     let storage_label = storage_kind_label(&storage_mode);
 
-    let skin_index = state.effective_skin();
-    let skin_css = skins::theme_css(skin_index).unwrap_or_default();
-    let theme_color = skins::theme_color(skin_index);
+    let skin_id = state.effective_skin();
+    let skin_css = skins::theme_css(&skin_id).unwrap_or_default();
+    let theme_color = skins::theme_color(&skin_id);
     let status = state.storage_status();
     // ConfigUnavailable isn't about a storage *type* (we have no config to know
     // it), so don't claim "Waiting for SD storage…" — give it its own title.

@@ -4,6 +4,9 @@ use super::*;
 use crate::api::response_cache::TtlSlot;
 #[cfg(feature = "ssr")]
 use replay_control_core::replay_api::{ConfigKind, ReplayApiStatus, SetCommand};
+use replay_control_core::skins::SkinId;
+#[cfg(feature = "ssr")]
+use replay_control_core::skins::{SKINS, SkinDefinition, definition, theme_css};
 use replay_control_core::update::UpdateChangelog;
 #[cfg(feature = "ssr")]
 use replay_control_core::update::{ChangelogEntry, UpdateChannel};
@@ -44,7 +47,7 @@ pub struct RetroAchievementsConfig {
 /// Skin info for the skin page.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SkinInfo {
-    pub index: u32,
+    pub id: SkinId,
     pub name: String,
     pub bg: String,
     pub surface: String,
@@ -79,18 +82,19 @@ impl TlsCertificateInfo {
 
 #[cfg(feature = "ssr")]
 impl SkinInfo {
-    fn from_palette(index: u32, name: String, p: &replay_control_core::skins::SkinPalette) -> Self {
+    fn from_definition(definition: &SkinDefinition) -> Self {
+        let palette = &definition.palette;
         Self {
-            index,
-            name,
-            bg: p.bg.to_string(),
-            surface: p.surface.to_string(),
-            surface_hover: p.surface_hover.to_string(),
-            border: p.border.to_string(),
-            text: p.text.to_string(),
-            text_secondary: p.text_secondary.to_string(),
-            accent: p.accent.to_string(),
-            accent_hover: p.accent_hover.to_string(),
+            id: SkinId::new(definition.id),
+            name: definition.name.to_string(),
+            bg: palette.bg.to_string(),
+            surface: palette.surface.to_string(),
+            surface_hover: palette.surface_hover.to_string(),
+            border: palette.border.to_string(),
+            text: palette.text.to_string(),
+            text_secondary: palette.text_secondary.to_string(),
+            accent: palette.accent.to_string(),
+            accent_hover: palette.accent_hover.to_string(),
         }
     }
 }
@@ -680,62 +684,38 @@ fn civil_from_unix_days(days: i64) -> (i32, u32, u32) {
     (year as i32, month as u32, day as u32)
 }
 
-/// Skin page data: (active_skin_index, sync_enabled, skins_list).
+/// Skin page data: (active_skin_id, sync_enabled, skins_list).
 #[server(prefix = "/sfn")]
-pub async fn get_skins() -> Result<(u32, bool, Vec<SkinInfo>), ServerFnError> {
+pub async fn get_skins() -> Result<(SkinId, bool, Vec<SkinInfo>), ServerFnError> {
     let state = super::app_state()?;
-    let skin_pref = state.prefs.read().expect("prefs lock poisoned").skin;
-    let current = skin_pref.unwrap_or_else(|| {
-        state
-            .replay_config
-            .read()
-            .expect("replay_config lock poisoned")
-            .as_ref()
-            .map(|c| c.system_skin())
-            .unwrap_or(0)
-    });
-    let sync = skin_pref.is_none();
+    let sync = state
+        .prefs
+        .read()
+        .expect("prefs lock poisoned")
+        .skin
+        .is_none();
+    let current = state.effective_skin();
 
-    let mut skins: Vec<SkinInfo> = replay_control_core::skins::SKIN_NAMES
-        .iter()
-        .enumerate()
-        .map(|(i, name)| {
-            let idx = i as u32;
-            SkinInfo::from_palette(
-                idx,
-                name.to_string(),
-                replay_control_core::skins::palette(idx).unwrap(),
-            )
-        })
-        .collect();
-
-    // Without a synthetic entry the grid would have nothing to highlight as
-    // active when the user is on a custom replayos skin, leaving them with
-    // no signal about what's selected.
-    if replay_control_core::skins::is_custom(current) {
-        skins.push(SkinInfo::from_palette(
-            current,
-            format!("CUSTOM #{current}"),
-            replay_control_core::skins::palette_or_default(current),
-        ));
-    }
+    let skins = SKINS.iter().map(SkinInfo::from_definition).collect();
 
     Ok((current, sync, skins))
 }
 
 #[server(prefix = "/sfn")]
-pub async fn set_skin(index: u32) -> Result<(), ServerFnError> {
+pub async fn set_skin(skin_id: SkinId) -> Result<(), ServerFnError> {
     let state = super::app_state()?;
+    if definition(&skin_id).is_none() {
+        return Err(ServerFnError::new("Unsupported skin ID"));
+    }
     // Persist to settings.cfg (not replay.cfg).
-    replay_control_core_server::settings::write_skin(&state.settings, Some(index))
+    replay_control_core_server::settings::write_skin(&state.settings, Some(skin_id.clone()))
         .map_err(|e| ServerFnError::new(e.to_string()))?;
-    state.prefs.write().expect("prefs lock poisoned").skin = Some(index);
+    state.prefs.write().expect("prefs lock poisoned").skin = Some(skin_id.clone());
 
-    let skin_css = replay_control_core::skins::theme_css(index);
-    let _ = state.events_tx.send(crate::api::ConfigEvent::SkinChanged {
-        skin_index: index,
-        skin_css,
-    });
+    let skin_css = theme_css(&skin_id);
+    let _ = state
+        .events_tx
+        .send(crate::api::ConfigEvent::SkinChanged { skin_id, skin_css });
     Ok(())
 }
 
@@ -749,15 +729,15 @@ pub async fn set_skin_sync(enabled: bool) -> Result<(), ServerFnError> {
         state.prefs.write().expect("prefs lock poisoned").skin = None;
     } else {
         let current = state.effective_skin();
-        replay_control_core_server::settings::write_skin(&state.settings, Some(current))
+        replay_control_core_server::settings::write_skin(&state.settings, Some(current.clone()))
             .map_err(|e| ServerFnError::new(e.to_string()))?;
         state.prefs.write().expect("prefs lock poisoned").skin = Some(current);
     }
 
     let effective = state.effective_skin();
-    let skin_css = replay_control_core::skins::theme_css(effective);
+    let skin_css = theme_css(&effective);
     let _ = state.events_tx.send(crate::api::ConfigEvent::SkinChanged {
-        skin_index: effective,
+        skin_id: effective,
         skin_css,
     });
     Ok(())

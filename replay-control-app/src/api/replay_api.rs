@@ -109,8 +109,7 @@ impl ReplayApi {
         } else {
             match self.client.get_version().await {
                 // A reachable, authorized device still fails the support gate if
-                // its version parses below the 1.7.4 floor (e.g. 1.7.3, whose
-                // config endpoints 404). Unparseable versions fail open — see
+                // its version parses below the 1.8.0 floor. Unparseable versions fail open — see
                 // `is_supported_replayos_version`.
                 Ok(version) if is_supported_replayos_version(&version.version) => {
                     ReplayApiStatus::Active {
@@ -222,7 +221,7 @@ mod tests {
 
     use super::*;
 
-    const VERSION_BODY: &str = r#"{"version":"RePlayOS v1.7.4"}"#;
+    const VERSION_BODY: &str = r#"{"version":"RePlayOS v1.8.0"}"#;
 
     fn api_with(
         base_url: String,
@@ -240,7 +239,7 @@ mod tests {
         assert_eq!(
             status,
             ReplayApiStatus::Active {
-                version: "RePlayOS v1.7.4".to_string()
+                version: "RePlayOS v1.8.0".to_string()
             }
         );
         assert!(api.status().is_active());
@@ -252,22 +251,22 @@ mod tests {
 
     #[tokio::test]
     async fn probe_below_min_version_is_unsupported() {
-        // 1.7.3 has the API and a valid token, but its config endpoints 404.
+        // 1.7.4 has the typed API but predates the supported 1.8.0 contract.
         let (api, _rx) = api_with(
-            mock_replay_api("200 OK", r#"{"version":"RePlayOS v1.7.3"}"#),
+            mock_replay_api("200 OK", r#"{"version":"RePlayOS v1.7.4"}"#),
             Some("123456"),
         );
         assert_eq!(
             api.probe().await,
             ReplayApiStatus::Unsupported {
-                version: Some("RePlayOS v1.7.3".to_string())
+                version: Some("RePlayOS v1.7.4".to_string())
             }
         );
     }
 
     #[tokio::test]
     async fn probe_at_min_version_is_active() {
-        // VERSION_BODY is exactly 1.7.4 — the floor — and reaches Active above
+        // VERSION_BODY is exactly 1.8.0 — the floor — and reaches Active above
         // in `probe_reaches_active`; this asserts a newer build also passes.
         let (api, _rx) = api_with(
             mock_replay_api("200 OK", r#"{"version":"RePlayOS v1.8.0"}"#),

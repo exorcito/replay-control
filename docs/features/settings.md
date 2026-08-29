@@ -89,13 +89,15 @@ Normal or large text. Applied across the entire app.
 
 The app ships with 11 built-in skins that control the color scheme of the web UI: REPLAY (default), MEGA TECH, PLAY CHOICE, ASTRO, SUPER VIDEO, MVS, RPG, FANTASY, SIMPLE PURPLE, METAL, and UNICOLORS. Each skin defines a full color palette — background, surface, text, accent, and border colors — applied via CSS custom properties.
 
+Skin sync follows RePlayOS's bundled global skin. When RePlayOS selects a custom global skin, Replay Control uses the REPLAY palette. Per-system skin overrides on the TV do not change Replay Control's palette.
+
 {{< screenshot "skins-page-mobile.png" "Skin selection page" >}}
 
 Browse and apply skins from **Settings > Skin**. The skin page shows all available skins with color previews, the currently active skin marked, and a one-tap apply.
 
 ### Sync Mode vs Manual Override
 
-- **Sync mode** (default) -- the app follows the skin active on the RePlayOS TV interface. When someone changes the skin on the TV (via the RePlayOS menu), the web UI updates to match automatically — and vice versa. This keeps the TV and companion app visually consistent.
+- **Sync mode** (default) -- the app follows the global skin active on the RePlayOS TV interface. When someone changes the skin on the TV, the web UI updates to the matching Replay Control palette automatically.
 - **Manual override** -- pick a specific skin for the web UI, independent of the TV skin. Useful if you prefer a different color scheme on your phone or tablet than what is displayed on the TV.
 
 A toggle at the top of the skin page controls the mode.

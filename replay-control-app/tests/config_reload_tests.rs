@@ -12,6 +12,7 @@
 use std::sync::atomic::{AtomicU32, Ordering};
 
 use replay_control_app::api::AppState;
+use replay_control_core::skins::SkinId;
 
 fn storage_with_config(cfg: &str) -> std::path::PathBuf {
     static COUNTER: AtomicU32 = AtomicU32::new(0);
@@ -28,6 +29,16 @@ fn storage_with_config(cfg: &str) -> std::path::PathBuf {
     }
     std::fs::write(tmp.join("config/replay.cfg"), cfg).unwrap();
     tmp
+}
+
+#[tokio::test]
+async fn unsupported_synced_skin_uses_replay_palette() {
+    let tmp = storage_with_config("system_storage = \"sd\"\nsystem_skin = \"midnight-arcade\"\n");
+    let state = AppState::new(Some(tmp.to_string_lossy().into_owned()), None, None).unwrap();
+
+    assert_eq!(state.effective_skin(), SkinId::default());
+
+    let _ = std::fs::remove_dir_all(&tmp);
 }
 
 #[tokio::test]

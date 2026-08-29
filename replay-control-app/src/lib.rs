@@ -67,6 +67,9 @@ use pages::skin::SkinPage;
 use pages::updating::UpdatingPage;
 use pages::wifi::WifiPage;
 use replay_control_core::replay_api::ReplayApiStatus;
+use replay_control_core::skins::SkinId;
+#[cfg(feature = "hydrate")]
+use replay_control_core::skins::theme_color;
 #[cfg(feature = "hydrate")]
 use replay_control_core::update::AvailableUpdate;
 use replay_control_core::{asset_health::AssetHealthIssue, update::UpdateState};
@@ -84,9 +87,9 @@ pub fn Shell(options: leptos::config::LeptosOptions) -> impl IntoView {
     use replay_control_core::skins;
 
     let state = expect_context::<AppState>();
-    let skin_index = state.effective_skin();
-    let theme_color = skins::theme_color(skin_index);
-    let skin_css = skins::theme_css(skin_index).unwrap_or_default();
+    let skin_id = state.effective_skin();
+    let theme_color = skins::theme_color(&skin_id);
+    let skin_css = skins::theme_css(&skin_id).unwrap_or_default();
     let font_size = state
         .prefs
         .read()
@@ -154,7 +157,7 @@ pub fn App() -> impl IntoView {
 
     // Fed by SseEventsListener; the skin page subscribes so its "current"
     // badge follows external skin changes (e.g. changed from the Pi).
-    provide_context(RwSignal::<Option<u32>>::new(None));
+    provide_context(RwSignal::<Option<SkinId>>::new(None));
 
     // Session caches that freeze recommendation data so browser Back resumes the
     // same set the user saw (see client_cache).
@@ -386,6 +389,28 @@ fn rom_watcher_status_from_payload(payload: &serde_json::Value) -> RomWatcherSta
         .unwrap_or_default()
 }
 
+#[cfg(feature = "hydrate")]
+fn apply_skin_payload(payload: &serde_json::Value) -> Option<SkinId> {
+    let skin_id = payload
+        .get("skin_id")
+        .and_then(|value| value.as_str())
+        .map(SkinId::new)?;
+    let document = web_sys::window()?.document()?;
+    let skin_css = payload
+        .get("skin_css")
+        .and_then(|value| value.as_str())
+        .unwrap_or("");
+
+    if let Some(style_element) = document.get_element_by_id("skin-theme") {
+        style_element.set_text_content(Some(skin_css));
+    }
+    if let Ok(Some(meta)) = document.query_selector("meta[name='theme-color']") {
+        let _ = meta.set_attribute("content", theme_color(&skin_id));
+    }
+
+    Some(skin_id)
+}
+
 /// Single app-wide SSE listener for config, activity, and now-playing changes.
 ///
 /// Connects to `/sse/events` on hydration. This is a multiplexed endpoint so
@@ -405,7 +430,7 @@ fn SseEventsListener() -> impl IntoView {
         use wasm_bindgen::prelude::*;
 
         // `None` until the `init` event below seeds it.
-        let current_skin = expect_context::<RwSignal<Option<u32>>>();
+        let current_skin = expect_context::<RwSignal<Option<SkinId>>>();
         // Track the last storage kind to detect real transitions.
         let last_storage_kind = RwSignal::new(String::new());
 
@@ -473,9 +498,10 @@ fn SseEventsListener() -> impl IntoView {
 
                     match event_type {
                         "init" => {
-                            // Record initial state from server.
-                            if let Some(idx) = payload.get("skin_index").and_then(|v| v.as_u64()) {
-                                current_skin.set(Some(idx as u32));
+                            // Reapply the server's skin on reconnect. The server may have
+                            // restarted after replay.cfg changed while this tab stayed open.
+                            if let Some(index) = apply_skin_payload(&payload) {
+                                current_skin.set(Some(index));
                             }
                             if let Some(kind) = payload.get("storage_kind").and_then(|v| v.as_str())
                             {
@@ -521,41 +547,8 @@ fn SseEventsListener() -> impl IntoView {
                             }
                         }
                         "SkinChanged" => {
-                            if let Some(idx) = payload.get("skin_index").and_then(|v| v.as_u64()) {
-                                let idx = idx as u32;
-                                let prev = current_skin.get_untracked();
-                                if prev != Some(idx) {
-                                    // Update the <style id="skin-theme"> element.
-                                    if let Some(doc) = web_sys::window().and_then(|w| w.document())
-                                    {
-                                        if let Some(style_el) = doc.get_element_by_id("skin-theme")
-                                        {
-                                            let css = payload
-                                                .get("skin_css")
-                                                .and_then(|v| v.as_str())
-                                                .unwrap_or("");
-                                            style_el.set_text_content(Some(css));
-                                        }
-                                        // Update the theme-color meta tag.
-                                        if let Ok(Some(meta)) =
-                                            doc.query_selector("meta[name='theme-color']")
-                                        {
-                                            let bg = payload
-                                                .get("skin_css")
-                                                .and_then(|v| v.as_str())
-                                                .and_then(|css| {
-                                                    css.find("--bg:")
-                                                        .map(|i| &css[i + 5..])
-                                                        .and_then(|s| {
-                                                            s.find(';').map(|j| s[..j].trim())
-                                                        })
-                                                })
-                                                .unwrap_or("#1a1a2e");
-                                            let _ = meta.set_attribute("content", bg);
-                                        }
-                                    }
-                                    current_skin.set(Some(idx));
-                                }
+                            if let Some(index) = apply_skin_payload(&payload) {
+                                current_skin.set(Some(index));
                             }
                         }
                         "StorageChanged" => {

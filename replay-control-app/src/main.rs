@@ -105,7 +105,8 @@ mod ssr {
         owned_manuals_handler: MethodRouter,
         rom_docs_handler: MethodRouter,
     ) -> axum::Router {
-        let guidance_skin_css = skins::theme_css(state.effective_skin()).unwrap_or_default();
+        let guidance_skin = state.effective_skin();
+        let guidance_skin_css = skins::theme_css(&guidance_skin).unwrap_or_default();
         let loopback_compat_routes = axum::Router::new()
             .nest("/api/core", api::core_routes().with_state(state))
             .route("/captures/*path", captures_handler)
@@ -180,14 +181,14 @@ mod ssr {
   <style>
     :root {{
       color-scheme: light dark;
-      --bg: #0f1115;
-      --surface: #1a1d23;
+      --bg: #101b32;
+      --surface: #162541;
       --surface-shell-bg: var(--surface);
       --text: #f9fafb;
-      --text-secondary: #d1d5db;
-      --accent: #7dd3fc;
-      --accent-hover: #bae6fd;
-      --text-on-accent: #111827;
+      --text-secondary: #94a8c7;
+      --accent: #be1250;
+      --accent-hover: #d52b68;
+      --text-on-accent: #fff;
       --border: rgba(255,255,255,0.16);
     }}
     {skin_css}
@@ -460,7 +461,7 @@ mod ssr {
 
     fn config_init_payload(state: &api::AppState) -> serde_json::Value {
         let skin = state.effective_skin();
-        let skin_css = skins::theme_css(skin);
+        let skin_css = skins::theme_css(&skin);
         let storage_kind = if state.has_storage() {
             state.storage().kind.as_str().to_string()
         } else {
@@ -481,7 +482,7 @@ mod ssr {
 
         serde_json::json!({
             "type": "init",
-            "skin_index": skin,
+            "skin_id": skin,
             "skin_css": skin_css,
             "storage_kind": storage_kind,
             "storage_status": storage_status,

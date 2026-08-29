@@ -11,185 +11,230 @@ pub struct SkinPalette {
     pub accent_hover: &'static str,
 }
 
-/// `true` when `skin_index` falls outside our built-in palette table.
+/// Stable RePlayOS skin-folder identity.
 ///
-/// ReplayOS reserves slots beyond [`SKIN_NAMES`] for user-customizable skins
-/// defined by PNG files under `/opt/replay/images/`. We don't yet extract
-/// colors from those files, so [`palette`] and [`theme_css`] return `None`
-/// and rendering falls back to the default palette.
-pub fn is_custom(skin_index: u32) -> bool {
-    (skin_index as usize) >= SKIN_NAMES.len()
+/// The value is intentionally open rather than an enum so a future custom
+/// skin can flow through config and wire contracts without changing type.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[serde(transparent)]
+pub struct SkinId(String);
+
+impl Default for SkinId {
+    fn default() -> Self {
+        Self::new("replay")
+    }
 }
 
-/// Names of the 11 built-in skins (indices 0-10).
-pub const SKIN_NAMES: [&str; 11] = [
-    "REPLAY",
-    "MEGA TECH",
-    "PLAY CHOICE",
-    "ASTRO",
-    "SUPER VIDEO",
-    "MVS",
-    "RPG",
-    "FANTASY",
-    "SIMPLE PURPLE",
-    "METAL",
-    "UNICOLORS",
-];
+impl SkinId {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into().trim().to_ascii_lowercase())
+    }
 
-/// Built-in skin palettes, indexed 0-10.
-///
-/// Skin 0 (REPLAY) matches the default CSS `:root` values exactly.
-/// Other palettes are derived from the ReplayOS skin images and the
-/// aesthetic each skin represents.
-const PALETTES: [SkinPalette; 11] = [
-    // 0: REPLAY — default blue/indigo (matches current app CSS exactly)
-    SkinPalette {
-        bg: "#0f1115",
-        surface: "#1a1d23",
-        surface_hover: "#22262e",
-        border: "#2a2e36",
-        text: "#e4e6ea",
-        text_secondary: "#8b8f96",
-        accent: "#6366f1",
-        accent_hover: "#818cf8",
-    },
-    // 1: MEGA TECH — Sega Mega Tech dark carbon with hot-pink selector
-    SkinPalette {
-        bg: "#1a1c1a",
-        surface: "#252825",
-        surface_hover: "#2e312e",
-        border: "#3a3d3a",
-        text: "#e2e4e2",
-        text_secondary: "#848684",
-        accent: "#ff004a",
-        accent_hover: "#ff3370",
-    },
-    // 2: PLAY CHOICE — Nintendo green/teal with orange selector
-    SkinPalette {
-        bg: "#0a200a",
-        surface: "#142e14",
-        surface_hover: "#1c381c",
-        border: "#1e421e",
-        text: "#d8ecd8",
-        text_secondary: "#7aaa7a",
-        accent: "#ff4300",
-        accent_hover: "#ff6b33",
-    },
-    // 3: ASTRO — Sega Astro City black with green accent
-    SkinPalette {
-        bg: "#080808",
-        surface: "#141414",
-        surface_hover: "#1c1c1c",
-        border: "#262626",
-        text: "#e0e8e0",
-        text_secondary: "#7a8a7a",
-        accent: "#00b543",
-        accent_hover: "#33cc66",
-    },
-    // 4: SUPER VIDEO — black with blue accent, red selector
-    SkinPalette {
-        bg: "#08080c",
-        surface: "#141420",
-        surface_hover: "#1c1c2a",
-        border: "#262638",
-        text: "#e0e2ea",
-        text_secondary: "#7a7e8e",
-        accent: "#2f54a4",
-        accent_hover: "#4a72c4",
-    },
-    // 5: MVS — SNK Neo Geo dark with red accent
-    SkinPalette {
-        bg: "#0f0f0f",
-        surface: "#1a1a1a",
-        surface_hover: "#242424",
-        border: "#2e2e2e",
-        text: "#e4e4e4",
-        text_secondary: "#8a8a8a",
-        accent: "#e00000",
-        accent_hover: "#ff2222",
-    },
-    // 6: RPG — warm grey with brown/green tones
-    SkinPalette {
-        bg: "#1e1c1e",
-        surface: "#2a282a",
-        surface_hover: "#343234",
-        border: "#3e3c3e",
-        text: "#e4dcd4",
-        text_secondary: "#9a8e82",
-        accent: "#6daa2c",
-        accent_hover: "#84c43e",
-    },
-    // 7: FANTASY — deep indigo/blue with pink accent
-    SkinPalette {
-        bg: "#06043a",
-        surface: "#0e0c4e",
-        surface_hover: "#161460",
-        border: "#1e1a6e",
-        text: "#e4eaf5",
-        text_secondary: "#9a9ec8",
-        accent: "#be1250",
-        accent_hover: "#d83070",
-    },
-    // 8: SIMPLE PURPLE — minimal dark with purple accent
-    SkinPalette {
-        bg: "#111111",
-        surface: "#1c1c1c",
-        surface_hover: "#262626",
-        border: "#303030",
-        text: "#e8e8e8",
-        text_secondary: "#909090",
-        accent: "#7c3aed",
-        accent_hover: "#9b5bff",
-    },
-    // 9: METAL — noir chrome, dark grey/silver
-    SkinPalette {
-        bg: "#0a0a0a",
-        surface: "#161616",
-        surface_hover: "#202020",
-        border: "#2a2a2a",
-        text: "#d0d0d0",
-        text_secondary: "#777777",
-        accent: "#7e2553",
-        accent_hover: "#9e3a70",
-    },
-    // 10: UNICOLORS — black with gold accent
-    SkinPalette {
-        bg: "#0a0a08",
-        surface: "#161614",
-        surface_hover: "#201e1c",
-        border: "#2c2a26",
-        text: "#e4e2dc",
-        text_secondary: "#a09460",
-        accent: "#c8a848",
-        accent_hover: "#dcc060",
-    },
-];
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
 
-/// Look up the palette for a built-in skin index.
-///
-/// Returns `None` for [`is_custom`] indices — those are PNG-based and we
-/// don't extract colors at runtime. Use [`palette_or_default`] when a
-/// fallback to the default palette is acceptable.
-pub fn palette(skin_index: u32) -> Option<&'static SkinPalette> {
-    PALETTES.get(skin_index as usize)
+    pub fn is_supported(&self) -> bool {
+        definition(self).is_some()
+    }
+
+    /// Parse current IDs and migrate RC's pre-1.8 numeric preference values.
+    pub fn from_stored_value(value: &str) -> Option<Self> {
+        if value.trim().is_empty() {
+            return None;
+        }
+        if let Ok(index) = value.parse::<usize>() {
+            return SKINS.get(index).map(|skin| Self::new(skin.id));
+        }
+        Some(Self::new(value))
+    }
 }
 
-/// Like [`palette`], but falls back to the default skin (0) for any index
-/// without a built-in palette.
-pub fn palette_or_default(skin_index: u32) -> &'static SkinPalette {
-    palette(skin_index).unwrap_or(&PALETTES[0])
+#[derive(Debug, Clone)]
+pub struct SkinDefinition {
+    pub id: &'static str,
+    pub name: &'static str,
+    pub palette: SkinPalette,
+}
+
+/// Bundled global skins in RePlayOS 1.8 display order.
+pub const SKINS: [SkinDefinition; 11] = [
+    SkinDefinition {
+        id: "replay",
+        name: "REPLAY",
+        palette: SkinPalette {
+            bg: "#101b32",
+            surface: "#162541",
+            surface_hover: "#1d3154",
+            border: "#065ab5",
+            text: "#edf4ff",
+            text_secondary: "#94a8c7",
+            accent: "#be1250",
+            accent_hover: "#d52b68",
+        },
+    },
+    SkinDefinition {
+        id: "mega-tech",
+        name: "MEGA TECH",
+        palette: SkinPalette {
+            bg: "#1b1e1c",
+            surface: "#2d312d",
+            surface_hover: "#3a3f3a",
+            border: "#535d55",
+            text: "#e8ebe8",
+            text_secondary: "#a2aaa3",
+            accent: "#ff004a",
+            accent_hover: "#ff3370",
+        },
+    },
+    SkinDefinition {
+        id: "play-choice",
+        name: "PLAY CHOICE",
+        palette: SkinPalette {
+            bg: "#003800",
+            surface: "#005100",
+            surface_hover: "#096809",
+            border: "#4c864c",
+            text: "#e7f0e5",
+            text_secondary: "#a8c8a8",
+            accent: "#ff4300",
+            accent_hover: "#ff6b33",
+        },
+    },
+    SkinDefinition {
+        id: "astro",
+        name: "ASTRO",
+        palette: SkinPalette {
+            bg: "#000000",
+            surface: "#111111",
+            surface_hover: "#1d1d1d",
+            border: "#4e4e4e",
+            text: "#e7eee9",
+            text_secondary: "#97a79d",
+            accent: "#00b543",
+            accent_hover: "#19ca58",
+        },
+    },
+    SkinDefinition {
+        id: "super-video",
+        name: "SUPER VIDEO",
+        palette: SkinPalette {
+            bg: "#020304",
+            surface: "#111722",
+            surface_hover: "#1c2636",
+            border: "#2f54a4",
+            text: "#e8edf5",
+            text_secondary: "#9ba9bd",
+            accent: "#892123",
+            accent_hover: "#a92d30",
+        },
+    },
+    SkinDefinition {
+        id: "mvs",
+        name: "MVS",
+        palette: SkinPalette {
+            bg: "#0f0f0f",
+            surface: "#1a1a1a",
+            surface_hover: "#292929",
+            border: "#5e0a0a",
+            text: "#eeeeee",
+            text_secondary: "#a0a0a0",
+            accent: "#e10202",
+            accent_hover: "#ff2424",
+        },
+    },
+    SkinDefinition {
+        id: "rpg",
+        name: "RPG",
+        palette: SkinPalette {
+            bg: "#2c292c",
+            surface: "#4e4a4e",
+            surface_hover: "#5d585d",
+            border: "#8b542e",
+            text: "#f2e9df",
+            text_secondary: "#c5aa92",
+            accent: "#6daa2c",
+            accent_hover: "#83c43b",
+        },
+    },
+    SkinDefinition {
+        id: "fantasy",
+        name: "FANTASY",
+        palette: SkinPalette {
+            bg: "#02023c",
+            surface: "#07056d",
+            surface_hover: "#08058b",
+            border: "#909290",
+            text: "#f0f1f3",
+            text_secondary: "#b8b9c8",
+            accent: "#be1250",
+            accent_hover: "#d52b68",
+        },
+    },
+    SkinDefinition {
+        id: "simple-purple",
+        name: "SIMPLE PURPLE",
+        palette: SkinPalette {
+            bg: "#0e0e0e",
+            surface: "#171717",
+            surface_hover: "#242424",
+            border: "#474747",
+            text: "#ededed",
+            text_secondary: "#a0a0a0",
+            accent: "#4c007f",
+            accent_hover: "#6500a8",
+        },
+    },
+    SkinDefinition {
+        id: "metal",
+        name: "METAL",
+        palette: SkinPalette {
+            bg: "#040404",
+            surface: "#161616",
+            surface_hover: "#252525",
+            border: "#5d5c5c",
+            text: "#dedede",
+            text_secondary: "#929292",
+            accent: "#7e2553",
+            accent_hover: "#9e3a70",
+        },
+    },
+    SkinDefinition {
+        id: "unicolors",
+        name: "UNICOLORS",
+        palette: SkinPalette {
+            bg: "#020001",
+            surface: "#151313",
+            surface_hover: "#242121",
+            border: "#505050",
+            text: "#eeeae0",
+            text_secondary: "#b3a56b",
+            accent: "#a49963",
+            accent_hover: "#b9ad76",
+        },
+    },
+];
+
+pub fn definition(skin_id: &SkinId) -> Option<&'static SkinDefinition> {
+    SKINS.iter().find(|skin| skin.id == skin_id.as_str())
+}
+
+pub fn palette(skin_id: &SkinId) -> &'static SkinPalette {
+    definition(skin_id)
+        .map(|skin| &skin.palette)
+        .unwrap_or(&SKINS[0].palette)
 }
 
 /// Generate a CSS `<style>` block that overrides `:root` custom properties
-/// for the given skin index.
+/// for the given supported global skin ID.
 ///
-/// Returns `None` for skin 0 (the default, which matches the static CSS)
-/// or for out-of-range indices.
-pub fn theme_css(skin_index: u32) -> Option<String> {
-    if skin_index == 0 {
+/// Returns `None` for RePlay (which matches the static CSS) and unsupported
+/// IDs, which currently use the RePlay fallback palette.
+pub fn theme_css(skin_id: &SkinId) -> Option<String> {
+    if skin_id.as_str() == "replay" || !skin_id.is_supported() {
         return None;
     }
-    let p = palette(skin_index)?;
+    let p = palette(skin_id);
     Some(format!(
         ":root{{\
 --bg:{bg};\
@@ -212,11 +257,9 @@ pub fn theme_css(skin_index: u32) -> Option<String> {
     ))
 }
 
-/// Return the `--bg` color for a skin index (used for `<meta name="theme-color">`).
-///
-/// Falls back to the default skin 0 background for unknown indices.
-pub fn theme_color(skin_index: u32) -> &'static str {
-    palette(skin_index).map_or(PALETTES[0].bg, |p| p.bg)
+/// Return the `--bg` color for a skin ID (used for `<meta name="theme-color">`).
+pub fn theme_color(skin_id: &SkinId) -> &'static str {
+    palette(skin_id).bg
 }
 
 #[cfg(test)]
@@ -225,62 +268,80 @@ mod tests {
 
     #[test]
     fn default_skin_returns_no_css() {
-        assert!(theme_css(0).is_none());
+        assert!(theme_css(&SkinId::new("replay")).is_none());
     }
 
     #[test]
     fn valid_skin_returns_css() {
-        let css = theme_css(1).unwrap();
+        let css = theme_css(&SkinId::new("mega-tech")).unwrap();
         assert!(css.contains("--bg:"));
         assert!(css.contains("#ff004a")); // MEGA TECH accent
     }
 
     #[test]
-    fn palette_returns_none_for_non_builtin() {
-        assert!(palette(11).is_none()); // first custom slot
-        assert!(palette(99).is_none()); // far outside the table
-        assert!(theme_css(11).is_none());
+    fn replayos_ids_round_trip() {
+        for skin in &SKINS {
+            let skin_id = SkinId::new(skin.id);
+            assert_eq!(definition(&skin_id).map(|known| known.id), Some(skin.id));
+        }
+        assert_eq!(SkinId::new("ASTRO").as_str(), "astro");
+        assert!(!SkinId::new("midnight-arcade").is_supported());
     }
 
     #[test]
-    fn is_custom_starts_after_builtins() {
-        assert!(!is_custom(0));
-        assert!(!is_custom(10));
-        assert!(is_custom(11));
-        assert!(is_custom(36));
-        assert!(is_custom(99));
+    fn skin_id_serializes_as_replayos_value() {
+        let skin_id = SkinId::new("astro");
+        assert_eq!(serde_json::to_string(&skin_id).unwrap(), "\"astro\"");
+        assert_eq!(
+            serde_json::from_str::<SkinId>("\"midnight-arcade\"").unwrap(),
+            SkinId::new("midnight-arcade")
+        );
     }
 
     #[test]
-    fn theme_color_default_fallback() {
-        assert_eq!(theme_color(0), "#0f1115");
-        assert_eq!(theme_color(99), "#0f1115");
+    fn stored_numeric_values_migrate_to_ids() {
+        assert_eq!(SkinId::from_stored_value("0"), Some(SkinId::new("replay")));
+        assert_eq!(SkinId::from_stored_value("3"), Some(SkinId::new("astro")));
+        assert_eq!(
+            SkinId::from_stored_value("10"),
+            Some(SkinId::new("unicolors"))
+        );
+        assert_eq!(SkinId::from_stored_value("11"), None);
+        assert_eq!(
+            SkinId::from_stored_value("midnight-arcade"),
+            Some(SkinId::new("midnight-arcade"))
+        );
+    }
+
+    #[test]
+    fn unsupported_skin_uses_replay_palette() {
+        let custom = SkinId::new("midnight-arcade");
+        assert!(!custom.is_supported());
+        assert_eq!(palette(&custom).bg, palette(&SkinId::default()).bg);
+        assert_eq!(theme_color(&custom), theme_color(&SkinId::default()));
+        assert!(theme_css(&custom).is_none());
     }
 
     #[test]
     fn all_palettes_have_valid_hex_colors() {
-        for (i, p) in PALETTES.iter().enumerate() {
+        for skin in &SKINS {
+            let palette = &skin.palette;
             for (name, color) in [
-                ("bg", p.bg),
-                ("surface", p.surface),
-                ("surface_hover", p.surface_hover),
-                ("border", p.border),
-                ("text", p.text),
-                ("text_secondary", p.text_secondary),
-                ("accent", p.accent),
-                ("accent_hover", p.accent_hover),
+                ("bg", palette.bg),
+                ("surface", palette.surface),
+                ("surface_hover", palette.surface_hover),
+                ("border", palette.border),
+                ("text", palette.text),
+                ("text_secondary", palette.text_secondary),
+                ("accent", palette.accent),
+                ("accent_hover", palette.accent_hover),
             ] {
                 assert!(
                     color.starts_with('#') && (color.len() == 7 || color.len() == 4),
-                    "Skin {i} ({}) has invalid {name} color: {color}",
-                    SKIN_NAMES[i],
+                    "Skin {} has invalid {name} color: {color}",
+                    skin.id,
                 );
             }
         }
-    }
-
-    #[test]
-    fn skin_names_count_matches_palettes() {
-        assert_eq!(SKIN_NAMES.len(), PALETTES.len());
     }
 }

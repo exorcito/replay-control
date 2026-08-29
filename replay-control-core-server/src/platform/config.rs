@@ -3,6 +3,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use replay_control_core::error::{Error, Result};
+use replay_control_core::skins::SkinId;
 
 /// Allowed admin elevation durations for Replay Control sign-in.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -291,14 +292,20 @@ impl ReplayConfig {
         self.inner.get("video_connector")
     }
 
-    /// Active skin index from `replay.cfg` (0-10 for built-in skins).
-    /// Used as fallback when the app has no skin preference in `settings.cfg`
-    /// (i.e., sync mode is on). Defaults to 0 (the REPLAY skin).
-    pub fn system_skin(&self) -> u32 {
-        self.inner
-            .get("system_skin")
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(0)
+    /// Active RePlayOS skin identifier from `replay.cfg`.
+    ///
+    /// Since RePlayOS 1.8 this is a stable folder ID such as `replay` or
+    /// `midnight-arcade`. Older RePlayOS releases stored a numeric slot here;
+    /// Replay Control's local palette preferences are independent from this
+    /// RePlayOS-owned value.
+    pub fn system_skin_id(&self) -> &str {
+        self.inner.get_non_empty("system_skin").unwrap_or("replay")
+    }
+
+    /// Selected bundled global skin. Unknown custom or per-system skin IDs
+    /// deliberately fall back to RePlay.
+    pub fn system_skin(&self) -> SkinId {
+        SkinId::new(self.system_skin_id())
     }
 
     pub fn retroachievements_username(&self) -> Option<&str> {
@@ -408,8 +415,10 @@ impl AppSettings {
         }
     }
 
-    pub fn skin(&self) -> Option<u32> {
-        self.inner.get_non_empty("skin")?.parse().ok()
+    pub fn skin(&self) -> Option<SkinId> {
+        self.inner
+            .get_non_empty("skin")
+            .and_then(SkinId::from_stored_value)
     }
 
     pub fn language_primary(&self) -> Option<&str> {
@@ -496,9 +505,9 @@ impl AppSettings {
         self.inner.set("font_size", value);
     }
 
-    pub fn set_skin(&mut self, skin: Option<u32>) {
+    pub fn set_skin(&mut self, skin: Option<SkinId>) {
         match skin {
-            Some(index) => self.inner.set("skin", &index.to_string()),
+            Some(skin_id) => self.inner.set("skin", skin_id.as_str()),
             None => self.inner.set("skin", ""),
         }
     }
@@ -691,13 +700,28 @@ mod tests {
     #[test]
     fn system_skin_default() {
         let config = ReplayConfig::parse("").unwrap();
-        assert_eq!(config.system_skin(), 0);
+        assert_eq!(config.system_skin_id(), "replay");
+        assert_eq!(config.system_skin(), SkinId::new("replay"));
     }
 
     #[test]
-    fn system_skin_parsed() {
-        let config = ReplayConfig::parse("system_skin = \"5\"").unwrap();
-        assert_eq!(config.system_skin(), 5);
+    fn named_replay_skin_resolves() {
+        let config = ReplayConfig::parse("system_skin = \"replay\"").unwrap();
+        assert_eq!(config.system_skin_id(), "replay");
+        assert_eq!(config.system_skin(), SkinId::new("replay"));
+    }
+
+    #[test]
+    fn custom_skin_id_is_preserved() {
+        let config = ReplayConfig::parse("system_skin = \"midnight-arcade\"").unwrap();
+        assert_eq!(config.system_skin(), SkinId::new("midnight-arcade"));
+    }
+
+    #[test]
+    fn named_bundled_skin_resolves() {
+        let config = ReplayConfig::parse("system_skin = \"astro\"").unwrap();
+        assert_eq!(config.system_skin_id(), "astro");
+        assert_eq!(config.system_skin(), SkinId::new("astro"));
     }
 
     #[test]
@@ -804,16 +828,39 @@ mod tests {
 
         let mut settings = AppSettings::empty();
         settings.set_region_preference("japan");
-        settings.set_skin(Some(5));
+        settings.set_skin(Some(SkinId::new("mvs")));
         settings.set_language_primary("ja");
         settings.set_update_channel("beta");
         settings.save(&path).unwrap();
 
         let loaded = AppSettings::from_file(&path).unwrap();
         assert_eq!(loaded.region_preference(), "japan");
-        assert_eq!(loaded.skin(), Some(5));
+        assert_eq!(loaded.skin(), Some(SkinId::new("mvs")));
         assert_eq!(loaded.language_primary(), Some("ja"));
         assert_eq!(loaded.update_channel(), "beta");
+    }
+
+    #[test]
+    fn app_settings_migrates_legacy_numeric_skin() {
+        let tmp_dir = std::env::temp_dir().join(format!(
+            "replay-settings-skin-migration-{}",
+            std::process::id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+        std::fs::create_dir_all(&tmp_dir).unwrap();
+        let path = tmp_dir.join("settings.cfg");
+        std::fs::write(&path, "skin = \"3\"\n").unwrap();
+
+        let mut settings = AppSettings::from_file(&path).unwrap();
+        assert_eq!(settings.skin(), Some(SkinId::new("astro")));
+
+        settings.set_skin(Some(SkinId::new("astro")));
+        settings.save(&path).unwrap();
+        assert!(
+            std::fs::read_to_string(path)
+                .unwrap()
+                .contains("skin = \"astro\"")
+        );
     }
 
     #[test]
@@ -875,7 +922,7 @@ mod tests {
         std::fs::write(&path, "# My settings\nregion_preference = \"usa\"\n").unwrap();
 
         let mut settings = AppSettings::from_file(&path).unwrap();
-        settings.set_skin(Some(3));
+        settings.set_skin(Some(SkinId::new("astro")));
         settings.save(&path).unwrap();
 
         let content = std::fs::read_to_string(&path).unwrap();
@@ -884,7 +931,7 @@ mod tests {
             content.contains("region_preference = \"usa\""),
             "existing key preserved"
         );
-        assert!(content.contains("skin = \"3\""), "new key added");
+        assert!(content.contains("skin = \"astro\""), "new key added");
     }
 
     #[test]

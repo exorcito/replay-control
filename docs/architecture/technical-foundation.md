@@ -165,6 +165,12 @@ Two SSE endpoints provide real-time push notifications:
 
 See [Activity System](activity-system.md) for the mutual exclusion and progress broadcasting design.
 
+## Skin Synchronization
+
+Skin identity uses the RePlayOS 1.8 global folder ID end to end, including `replay.cfg`, Replay Control's optional manual override, server-function values, and SSE events. The palette registry maps the 11 bundled global IDs to static Replay Control color palettes derived from the corresponding RePlayOS images. Older numeric Replay Control preferences are translated when read and written back as IDs on the next change.
+
+The ID value is intentionally open so future custom-skin support does not require another config or wire-format migration. For now, an unknown custom global ID is preserved but resolves to the REPLAY palette. Replay Control does not read skin image assets at runtime and ignores RePlayOS per-system image overrides.
+
 ## Shared HTTP Client
 
 All outbound HTTP requests use a shared `reqwest` client (`replay-control-core-server/src/http.rs`, `shared_client()`). The client is initialized once with sensible defaults (timeouts, connection pooling) and reused across the app. This replaced earlier curl subprocess calls, reducing overhead and enabling connection reuse for GitHub API, LaunchBox downloads, and thumbnail fetches.

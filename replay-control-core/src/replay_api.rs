@@ -1,6 +1,6 @@
 //! Pure wire types for the official RePlayOS REST API.
 //!
-//! RePlayOS ≥ 1.7.4 (minimum supported) serves `http://<device>:55356/api/v1` from the frontend
+//! RePlayOS ≥ 1.8.0 (minimum supported) serves `http://<device>:55356/api/v1` from the frontend
 //! process, gated on the `system_net_control` config option and authenticated
 //! with the `X-RePlay-Token` header (the "Net Control code"). The native
 //! client lives in `replay_control_core_server::replay_api`; this module holds
@@ -147,12 +147,10 @@ pub struct PlaytimeGame {
 
 /// Minimum RePlayOS version Replay Control supports as `(major, minor, patch)`.
 ///
-/// 1.7.4 renamed the config endpoints (`get_replay_config` →
-/// `get_config?type=…`, old names now 404). A 1.7.3 device exposes the API and
-/// passes the bare `system_net_control` presence check, so it connects as
-/// `Active` — but every config read/write then 404s. Gating on this floor
-/// rejects such a device up front with a clear "update RePlayOS" verdict.
-pub const MIN_SUPPORTED: (u32, u32, u32) = (1, 7, 4);
+/// 1.8.0 introduced the named skin configuration Replay Control uses for skin
+/// sync, in addition to the stable typed config API introduced in 1.7.4.
+/// Gating on this floor keeps those contracts unconditional.
+pub const MIN_SUPPORTED: (u32, u32, u32) = (1, 8, 0);
 
 /// Parse a RePlayOS version string into a comparable `(major, minor, patch)`.
 ///
@@ -830,18 +828,18 @@ mod tests {
 
     #[test]
     fn is_supported_at_exact_minimum() {
-        assert!(is_supported_replayos_version("RePlayOS v1.7.4"));
+        assert!(is_supported_replayos_version("RePlayOS v1.8.0"));
     }
 
     #[test]
     fn is_supported_above_minimum() {
-        assert!(is_supported_replayos_version("RePlayOS v1.7.10"));
-        assert!(is_supported_replayos_version("RePlayOS v1.8.0"));
+        assert!(is_supported_replayos_version("RePlayOS v1.8.1"));
         assert!(is_supported_replayos_version("RePlayOS v2.0.0"));
     }
 
     #[test]
     fn is_unsupported_below_minimum() {
+        assert!(!is_supported_replayos_version("RePlayOS v1.7.10"));
         assert!(!is_supported_replayos_version("RePlayOS v1.7.3"));
         assert!(!is_supported_replayos_version("RePlayOS v1.6.9"));
         assert!(!is_supported_replayos_version("RePlayOS v1.0.0"));

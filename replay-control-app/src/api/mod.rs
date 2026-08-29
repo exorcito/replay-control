@@ -107,6 +107,7 @@ use std::sync::atomic::AtomicU64;
 
 use replay_control_core::error::Result as CoreResult;
 use replay_control_core::runtime_env::Mode;
+use replay_control_core::skins::{SkinId, theme_css};
 use replay_control_core_server::auth::{AuthStore, LoginRateLimiter};
 use replay_control_core_server::config::{ReplayConfig, replay_config_path};
 use replay_control_core_server::data_dir::DataDir;
@@ -121,7 +122,7 @@ pub use crate::types::{RomWatcherStatus, StorageStatus, storage_kind_label};
 #[serde(tag = "type")]
 pub enum ConfigEvent {
     SkinChanged {
-        skin_index: u32,
+        skin_id: SkinId,
         skin_css: Option<String>,
     },
     StorageChanged {
@@ -835,15 +836,6 @@ impl AppState {
             asset_health: Arc::new(std::sync::RwLock::new(initial_issues)),
         };
 
-        // Surface custom-skin fallback in the log; without this it's invisible
-        // that the user's configured palette isn't being honoured.
-        let effective_skin = state.effective_skin();
-        if replay_control_core::skins::is_custom(effective_skin) {
-            tracing::info!(
-                "system_skin={effective_skin} is a ReplayOS custom user skin; rendering with default palette until PNG-based color extraction is added"
-            );
-        }
-
         Ok(state)
     }
 
@@ -1174,19 +1166,27 @@ impl AppState {
             .first_setup_done
     }
 
-    /// Get the effective skin index: app preference if set,
+    /// Get the effective skin ID: app preference if set,
     /// otherwise fall back to `replay.cfg`'s `system_skin` (sync mode).
-    pub fn effective_skin(&self) -> u32 {
-        if let Some(index) = self.prefs.read().expect("prefs lock poisoned").skin {
-            index
-        } else {
-            self.replay_config
-                .read()
-                .expect("replay_config lock poisoned")
-                .as_ref()
-                .map(|c| c.system_skin())
-                .unwrap_or(0)
-        }
+    pub fn effective_skin(&self) -> SkinId {
+        let selected = self
+            .prefs
+            .read()
+            .expect("prefs lock poisoned")
+            .skin
+            .clone()
+            .unwrap_or_else(|| {
+                self.replay_config
+                    .read()
+                    .expect("replay_config lock poisoned")
+                    .as_ref()
+                    .map(ReplayConfig::system_skin)
+                    .unwrap_or_default()
+            });
+        selected
+            .is_supported()
+            .then_some(selected)
+            .unwrap_or_default()
     }
 
     /// Enable RePlayOS Net Control in `replay.cfg` and write back to disk.
@@ -1245,9 +1245,9 @@ impl AppState {
         }
         let new_skin = self.effective_skin();
         if old_skin != new_skin {
-            let skin_css = replay_control_core::skins::theme_css(new_skin);
+            let skin_css = theme_css(&new_skin);
             let _ = self.events_tx.send(ConfigEvent::SkinChanged {
-                skin_index: new_skin,
+                skin_id: new_skin,
                 skin_css,
             });
         }

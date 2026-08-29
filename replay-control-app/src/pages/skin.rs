@@ -5,6 +5,7 @@ use server_fn::ServerFnError;
 
 use crate::i18n::{Key, t, use_i18n};
 use crate::server_fns;
+use replay_control_core::skins::SkinId;
 
 #[component]
 pub fn SkinPage() -> impl IntoView {
@@ -31,7 +32,7 @@ pub fn SkinPage() -> impl IntoView {
 }
 
 #[component]
-fn SkinGrid(current: u32, sync: bool, skins: Vec<server_fns::SkinInfo>) -> impl IntoView {
+fn SkinGrid(current: SkinId, sync: bool, skins: Vec<server_fns::SkinInfo>) -> impl IntoView {
     let i18n = use_i18n();
     let active = RwSignal::new(current);
     let sync_enabled = RwSignal::new(sync);
@@ -39,12 +40,12 @@ fn SkinGrid(current: u32, sync: bool, skins: Vec<server_fns::SkinInfo>) -> impl 
     let status = RwSignal::new(Option::<(bool, String)>::None);
 
     // Follow external skin changes (e.g. from the Pi) so the "current" badge moves.
-    if let Some(current_skin) = use_context::<RwSignal<Option<u32>>>() {
+    if let Some(current_skin) = use_context::<RwSignal<Option<SkinId>>>() {
         Effect::new(move |_| {
-            if let Some(idx) = current_skin.get()
-                && active.get_untracked() != idx
+            if let Some(skin_id) = current_skin.get()
+                && active.get_untracked() != skin_id
             {
-                active.set(idx);
+                active.set(skin_id);
             }
         });
     }
@@ -107,17 +108,16 @@ fn SkinGrid(current: u32, sync: bool, skins: Vec<server_fns::SkinInfo>) -> impl 
 #[component]
 fn SkinCard(
     skin: server_fns::SkinInfo,
-    active: RwSignal<u32>,
+    active: RwSignal<SkinId>,
     sync_enabled: RwSignal<bool>,
     saving: RwSignal<bool>,
     status: RwSignal<Option<(bool, String)>>,
 ) -> impl IntoView {
     let i18n = use_i18n();
-    let index = skin.index;
-    let is_custom = replay_control_core::skins::is_custom(index);
+    let skin_id = StoredValue::new(skin.id);
 
-    let is_active = move || active.get() == index;
-    let is_disabled = move || saving.get() || sync_enabled.get() || is_custom;
+    let is_active = move || active.get() == skin_id.get_value();
+    let is_disabled = move || saving.get() || sync_enabled.get();
     let card_class = move || {
         if is_active() {
             "skin-card skin-card-active"
@@ -137,13 +137,14 @@ fn SkinCard(
     let text_secondary = skin.text_secondary.clone();
 
     let on_click = move |_| {
-        if is_disabled() || active.get_untracked() == index {
+        let selected_skin_id = skin_id.get_value();
+        if is_disabled() || active.get_untracked() == selected_skin_id {
             return;
         }
         saving.set(true);
         status.set(None);
         leptos::task::spawn_local(async move {
-            match server_fns::set_skin(index).await {
+            match server_fns::set_skin(selected_skin_id).await {
                 Ok(()) => {
                     // Reload the page so the SSR-rendered skin theme
                     // style tag picks up the new skin. Simpler and more

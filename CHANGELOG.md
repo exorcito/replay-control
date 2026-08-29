@@ -4,6 +4,19 @@ Chronological timeline of changes to the Replay Control companion app for RePlay
 
 ---
 
+## [Unreleased]
+
+### Changed
+
+- **RePlayOS 1.8.0 is now the minimum supported version.** Skin sync follows RePlayOS's named global skin IDs instead of the removed numeric slots. Replay Control stores the same IDs for manual overrides, automatically reads older numeric Replay Control preferences, uses the REPLAY palette for a custom global skin, and ignores TV-only per-system overrides.
+- Refreshed all 11 Replay Control skin palettes from the bundled RePlayOS 1.8 skin images, including corrected RePlay, RPG, Simple Purple, and Super Video colors.
+
+### Fixed
+
+- Skin changes now reapply their palette when a browser reconnects after Replay Control restarts, so an open tab no longer keeps stale colors.
+
+---
+
 ## [1.2.0-beta.1]
 
 > Sony PSP support — browse your PSP library with box art, metadata, manuals, and RetroAchievements — plus a cleaner manuals folder layout that migrates itself.

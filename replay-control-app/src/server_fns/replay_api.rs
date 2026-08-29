@@ -402,7 +402,7 @@ pub async fn verify_replay_api_token(code: String) -> Result<ReplayApiStatus, Se
 
     let candidate = ReplayApiClient::local(Some(code.clone()));
     match candidate.get_version().await {
-        // Reject an old device (parsed version below 1.7.4) before storing the
+        // Reject an old device (parsed version below 1.8.0) before storing the
         // token, consistent with the probe. Unparseable versions fail open. The
         // status flips to `Unsupported` so the UI matches the probe's verdict.
         Ok(version) if !is_supported_replayos_version(&version.version) => {
