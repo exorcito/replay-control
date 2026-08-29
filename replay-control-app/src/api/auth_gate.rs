@@ -383,6 +383,8 @@ fn is_user_read_server_function(function: &str) -> bool {
             // Read-only: the update banner (shown to every user, not just
             // admins) renders the "what's new" changelog from this.
             | "get_update_changelog"
+            | "get_game_status"
+            | "get_games_by_status"
     )
 }
 
@@ -506,6 +508,8 @@ fn is_user_server_function(function: &str) -> bool {
                 | "remove_game_resource_link"
                 | "add_game_video"
                 | "remove_game_video"
+                | "set_game_status"
+                | "clear_game_status"
                 | "download_manual"
                 | "delete_manual"
                 | "set_boxart_override"

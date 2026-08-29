@@ -279,6 +279,10 @@ pub fn register_server_fns() {
     server_fn::axum::register_explicit::<server_fns::GetGameManualSuggestions>();
     server_fn::axum::register_explicit::<server_fns::DownloadManual>();
     server_fn::axum::register_explicit::<server_fns::DeleteManual>();
+    server_fn::axum::register_explicit::<server_fns::GetGameStatus>();
+    server_fn::axum::register_explicit::<server_fns::SetGameStatus>();
+    server_fn::axum::register_explicit::<server_fns::ClearGameStatus>();
+    server_fn::axum::register_explicit::<server_fns::GetGamesByStatus>();
     server_fn::axum::register_explicit::<server_fns::GetLanguagePreference>();
     server_fn::axum::register_explicit::<server_fns::SaveLanguagePreference>();
     server_fn::axum::register_explicit::<server_fns::GetPreferredLanguages>();
