@@ -1183,10 +1183,11 @@ impl AppState {
                     .map(ReplayConfig::system_skin)
                     .unwrap_or_default()
             });
-        selected
-            .is_supported()
-            .then_some(selected)
-            .unwrap_or_default()
+        if selected.is_supported() {
+            selected
+        } else {
+            SkinId::default()
+        }
     }
 
     /// Enable RePlayOS Net Control in `replay.cfg` and write back to disk.

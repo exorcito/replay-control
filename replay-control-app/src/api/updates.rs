@@ -615,7 +615,6 @@ async fn find_extracted_dir_containing(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::path::Path;
 
     // ── generate_update_script ──────────────────────────────────────
