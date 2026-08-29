@@ -490,6 +490,14 @@ impl AppSettings {
             .unwrap_or_default()
     }
 
+    pub fn replayos_message_duration_secs(&self) -> u8 {
+        self.inner
+            .get("replayos_message_duration_secs")
+            .and_then(|value| value.parse().ok())
+            .filter(|value| matches!(value, 1 | 3 | 5 | 10))
+            .unwrap_or(3)
+    }
+
     // ── Write accessors ──────────────────────────────────────────
 
     pub fn set_region_preference(&mut self, value: &str) {
@@ -560,6 +568,16 @@ impl AppSettings {
 
     pub fn set_admin_session_timeout(&mut self, timeout: AdminSessionTimeout) {
         self.inner.set("admin_session_timeout", timeout.as_str());
+    }
+
+    pub fn set_replayos_message_duration_secs(&mut self, duration_secs: u8) {
+        let duration_secs = if matches!(duration_secs, 1 | 3 | 5 | 10) {
+            duration_secs
+        } else {
+            3
+        };
+        self.inner
+            .set("replayos_message_duration_secs", &duration_secs.to_string());
     }
 
     /// Whether the first-run setup checklist has been dismissed.
@@ -816,6 +834,7 @@ mod tests {
             settings.admin_session_timeout(),
             AdminSessionTimeout::OneHour
         );
+        assert_eq!(settings.replayos_message_duration_secs(), 3);
     }
 
     #[test]
@@ -908,6 +927,18 @@ mod tests {
             settings.admin_session_timeout(),
             AdminSessionTimeout::OneHour
         );
+    }
+
+    #[test]
+    fn replayos_message_duration_accepts_only_ui_values() {
+        let mut settings = AppSettings::empty();
+        assert_eq!(settings.replayos_message_duration_secs(), 3);
+
+        settings.set_replayos_message_duration_secs(10);
+        assert_eq!(settings.replayos_message_duration_secs(), 10);
+
+        settings.inner.set("replayos_message_duration_secs", "7");
+        assert_eq!(settings.replayos_message_duration_secs(), 3);
     }
 
     #[test]

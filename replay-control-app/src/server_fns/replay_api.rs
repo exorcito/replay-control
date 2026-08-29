@@ -20,7 +20,10 @@ use crate::util::is_valid_net_control_code;
 #[cfg(feature = "ssr")]
 use replay_control_core_server::replay_api::{ApiError, ReplayApiClient};
 #[cfg(feature = "ssr")]
-use replay_control_core_server::settings::write_replay_api_token;
+use replay_control_core_server::settings::{
+    read_replayos_message_duration_secs, write_replay_api_token,
+    write_replayos_message_duration_secs,
+};
 #[cfg(feature = "ssr")]
 use std::sync::Arc;
 
@@ -45,6 +48,7 @@ pub enum ReplayPlayerCommand {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReplayOsSettings {
     pub kiosk_mode: bool,
+    pub message_duration_secs: u8,
 }
 
 /// Whether RePlayOS could report play time. Disabled and Unavailable both
@@ -112,7 +116,10 @@ pub async fn get_replayos_settings() -> Result<ReplayOsSettings, ServerFnError> 
         .as_ref()
         .is_some_and(|config| config.system_kiosk_mode_enabled());
 
-    Ok(ReplayOsSettings { kiosk_mode })
+    Ok(ReplayOsSettings {
+        kiosk_mode,
+        message_duration_secs: read_replayos_message_duration_secs(&state.settings),
+    })
 }
 
 /// The RePlayOS UI log level (`system_log_level`), read live via the API.
@@ -327,6 +334,10 @@ pub async fn send_replayos_message(
         ));
     }
     let duration_secs = duration_secs.clamp(1, 10);
+
+    if let Err(error) = write_replayos_message_duration_secs(&state.settings, duration_secs) {
+        tracing::warn!("Failed to save RePlayOS message duration: {error}");
+    }
 
     if let Err(error) = api.client().set_msg(text, duration_secs).await {
         api.report_error(&error);

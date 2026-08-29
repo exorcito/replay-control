@@ -72,7 +72,7 @@ fn NetControlContent(initial: ReplayApiStatus, settings: ReplayOsSettings) -> im
     let device_result = RwSignal::new(Option::<(bool, String)>::None);
     let mode_result = RwSignal::new(Option::<(bool, String)>::None);
     let message_text = RwSignal::new(String::new());
-    let message_duration = RwSignal::new("3".to_string());
+    let message_duration = RwSignal::new(settings.message_duration_secs.to_string());
     let kiosk_mode = RwSignal::new(settings.kiosk_mode);
     // "Re-enter code" affordance: re-open the setup sections while Active
     // (covers a TV-side code reset without waiting for a 401).

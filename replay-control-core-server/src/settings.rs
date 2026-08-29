@@ -413,6 +413,21 @@ pub fn write_admin_session_timeout(
     store.save(&settings)
 }
 
+/// Read the preferred duration for RePlayOS on-screen messages.
+pub fn read_replayos_message_duration_secs(store: &SettingsStore) -> u8 {
+    store.load().replayos_message_duration_secs()
+}
+
+/// Write the preferred duration for RePlayOS on-screen messages.
+pub fn write_replayos_message_duration_secs(
+    store: &SettingsStore,
+    duration_secs: u8,
+) -> Result<()> {
+    let mut settings = store.load();
+    settings.set_replayos_message_duration_secs(duration_secs);
+    store.save(&settings)
+}
+
 /// Read the GitHub API key from settings.
 /// Returns `None` if the file doesn't exist or the key is empty.
 pub fn read_github_api_key(store: &SettingsStore) -> Option<String> {
@@ -608,6 +623,15 @@ mod tests {
             read_admin_session_timeout(&store),
             AdminSessionTimeout::OneHour
         );
+    }
+
+    #[test]
+    fn write_and_read_replayos_message_duration() {
+        let store = test_store();
+        assert_eq!(read_replayos_message_duration_secs(&store), 3);
+
+        write_replayos_message_duration_secs(&store, 10).unwrap();
+        assert_eq!(read_replayos_message_duration_secs(&store), 10);
     }
 
     // --- Secondary region preference tests ---
