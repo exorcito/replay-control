@@ -63,6 +63,10 @@ Games that span multiple discs appear as one playable entry when a playlist is p
 
 From a user perspective, a three-disc game appears as one game with the combined size.
 
+## PlayStation Portable
+
+On RePlayOS 1.8 or newer, put PSP games in the `sony_psp` ROM folder. Replay Control recognizes `.elf`, `.iso`, `.cso`, `.prx`, `.pbp`, and `.chd` files. Extract `.zip` archives before rescanning the library.
+
 ## Arcade Names
 
 Arcade ROMs often use short internal filenames such as `sf2.zip`. Replay Control shows readable game titles for MAME, FBNeo, and Flycast arcade systems, while still preserving clone/parent relationships and source categories used elsewhere in the app.

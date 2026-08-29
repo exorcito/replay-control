@@ -13,6 +13,8 @@ Chronological timeline of changes to the Replay Control companion app for RePlay
 
 ### Fixed
 
+- PSP libraries now recognize all RePlayOS-supported files: `.elf`, `.iso`, `.cso`, `.prx`, `.pbp`, and `.chd`. Compressed `.zip` archives must still be extracted first.
+- PSP box art sources are now imported when upgrading an existing installation, and already-scanned games are rematched after the new source arrives instead of waiting for an unrelated ROM change.
 - Skin changes now reapply their palette when a browser reconnects after Replay Control restarts, so an open tab no longer keeps stale colors.
 
 ---

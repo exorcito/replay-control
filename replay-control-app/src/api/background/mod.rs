@@ -6,6 +6,7 @@ use replay_control_core_server::library_db::LibraryDb;
 use replay_control_core_server::roms::{RomEntry, StorageProbe};
 use replay_control_core_server::storage::StorageLocation;
 use replay_control_core_server::{game_db, game_entry_builder, rc_hash_disc, rom_hash};
+use replay_control_core_server::{thumbnail_manifest, thumbnails};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -253,13 +254,16 @@ pub(crate) async fn run_pipeline(state: &AppState) -> bool {
     // Phase 0.5: On first boot, fetch optional source metadata before the
     // library scan. This is a one-time cost, and waiting avoids building a
     // partial first library that needs immediate re-enrichment.
-    if first_run_seed_enabled() {
+    let thumbnail_sources_updated = if first_run_seed_enabled() {
         if let Some(_guard) = claim_startup_activity(state, StartupPhase::FetchingMetadata).await {
-            phase_first_run_seed(state).await;
+            phase_first_run_seed(state).await
+        } else {
+            false
         }
     } else {
         tracing::debug!("phase_first_run_seed: disabled by environment");
-    }
+        false
+    };
 
     // Phase 1: Auto-import (if launchbox XML exists + DB empty).
     // Import claims/releases its own Activity::Import via try_start_activity.
@@ -287,6 +291,12 @@ pub(crate) async fn run_pipeline(state: &AppState) -> bool {
         phase_reresolve_rc_hash_ra_ids(state).await;
 
         phase_auto_rebuild_thumbnail_index(state).await;
+        if thumbnail_sources_updated {
+            // The manifest can arrive after a ROM watcher scan during startup.
+            // Re-enriching active systems queues its newly discoverable media
+            // without re-walking or rehashing their ROM files.
+            reenrich_all_systems(state).await;
+        }
         state
             .library
             .resume_pending_thumbnail_downloads(state)
@@ -445,13 +455,12 @@ async fn phase_title_norm_reconcile(state: &AppState) {
     }
 }
 
-/// Phase 0.5: On first boot, download the LaunchBox XML and the libretro
-/// thumbnail manifest before scanning so first-pass enrichment has source
-/// data available.
+/// Phase 0.5: Download missing external metadata sources before scanning so
+/// first-pass enrichment has source data available.
 ///
-/// First-run conditions (checked independently):
+/// Bootstrap conditions (checked independently):
 ///   - LaunchBox: no `launchbox_xml_crc32` in `external_meta` AND no XML on disk.
-///   - Libretro: `data_source` has no rows.
+///   - Libretro: a configured thumbnail repository has no `data_source` row.
 ///
 /// Any network failure is warn-logged and the pipeline continues normally.
 /// Phase 1 will detect and parse the downloaded XML via its usual hash check.
@@ -473,7 +482,9 @@ async fn phase_migrate_manuals_layout(state: &AppState) {
     }
 }
 
-async fn phase_first_run_seed(state: &AppState) {
+/// Returns whether a libretro thumbnail source was imported. The caller uses
+/// this to re-enrich already-indexed systems after the normal startup scan.
+async fn phase_first_run_seed(state: &AppState) -> bool {
     use replay_control_core_server::external_metadata::{self, meta_keys};
     use replay_control_core_server::library_db::resolve_launchbox_xml;
 
@@ -487,33 +498,39 @@ async fn phase_first_run_seed(state: &AppState) {
         .read(|conn| {
             let has_crc32 =
                 external_metadata::read_meta(conn, meta_keys::LAUNCHBOX_XML_CRC32).is_some();
-            let has_sources = external_metadata::get_data_source_stats(conn, "libretro-thumbnails")
-                .ok()
-                .map(|s| s.repo_count > 0)
-                .unwrap_or(false);
-            (has_crc32, has_sources)
+            let missing_thumbnail_repo =
+                thumbnail_manifest::collect_all_repos()
+                    .into_iter()
+                    .any(|repo| {
+                        let source_name = thumbnails::libretro_source_name(&repo.display_name);
+                        external_metadata::get_data_source(conn, &source_name)
+                            .ok()
+                            .flatten()
+                            .is_none()
+                    });
+            (has_crc32, missing_thumbnail_repo)
         })
         .await;
 
-    let (has_crc32, has_libretro_sources) = match seed_check {
+    let (has_crc32, missing_thumbnail_repo) = match seed_check {
         Some(v) => v,
         None => {
             tracing::warn!("phase_first_run_seed: pool unavailable, skipping");
-            return;
+            return false;
         }
     };
 
     let xml_on_disk = resolve_launchbox_xml(&download_dir, &rc_dir).is_some();
     let needs_launchbox = !has_crc32 && !xml_on_disk;
-    let needs_libretro = !has_libretro_sources;
+    let needs_libretro = missing_thumbnail_repo;
 
     if !needs_launchbox && !needs_libretro {
         tracing::debug!("phase_first_run_seed: not a first-run install, skipping");
-        return;
+        return false;
     }
 
     tracing::info!(
-        "phase_first_run_seed: first-run detected \
+        "phase_first_run_seed: source bootstrap required \
              (launchbox={needs_launchbox}, libretro={needs_libretro})"
     );
 
@@ -537,10 +554,11 @@ async fn phase_first_run_seed(state: &AppState) {
         }
     }
 
+    let mut thumbnail_sources_updated = false;
     if needs_libretro {
         let cancel = std::sync::atomic::AtomicBool::new(false);
         let api_key = replay_control_core_server::settings::read_github_api_key(&state.settings);
-        match replay_control_core_server::thumbnail_manifest::import_all_manifests(
+        match thumbnail_manifest::import_all_manifests(
             state.external_metadata_writer.as_db_pool(),
             &|_, _, _| {},
             &cancel,
@@ -548,20 +566,24 @@ async fn phase_first_run_seed(state: &AppState) {
         )
         .await
         {
-            Ok(stats) => tracing::info!(
-                "phase_first_run_seed: libretro manifest fetched \
-                     ({} repos, {} entries{})",
-                stats.repos_fetched,
-                stats.total_entries,
-                if stats.rate_limited {
-                    ", rate-limited"
-                } else {
-                    ""
-                }
-            ),
+            Ok(stats) => {
+                thumbnail_sources_updated = stats.repos_fetched > 0;
+                tracing::info!(
+                    "phase_first_run_seed: libretro manifest fetched \
+                         ({} repos, {} entries{})",
+                    stats.repos_fetched,
+                    stats.total_entries,
+                    if stats.rate_limited {
+                        ", rate-limited"
+                    } else {
+                        ""
+                    }
+                );
+            }
             Err(e) => tracing::warn!("phase_first_run_seed: libretro manifest failed: {e}"),
         }
     }
+    thumbnail_sources_updated
 }
 
 /// Phase 1: Refresh `external_metadata.db` from the LaunchBox XML when its

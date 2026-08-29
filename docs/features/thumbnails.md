@@ -34,6 +34,8 @@ downloaded in this order:
 2. Title screens
 3. In-game screenshots
 
+When an update adds artwork support for another system, Replay Control imports the new image source at startup and rematches games already in the library. A newly supported system does not need a ROM rename or a full library rebuild before its available artwork can be queued.
+
 The downloader keeps request concurrency bounded. If GitHub responds with
 temporary throttling or service-unavailable errors, Replay Control retries a few
 times with backoff instead of opening many requests at once.

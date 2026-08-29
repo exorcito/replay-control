@@ -1186,7 +1186,10 @@ pub static SYSTEMS: &[System] = &[
         category: SystemCategory::Handheld,
         abbreviation: "PSP",
         placeholder_color: "#2d2d2d",
-        extensions: &["iso", "cso", "pbp", "chd"],
+        // Keep this list aligned with RePlayOS's PPSSPP core configuration.
+        // PSP is only playable on Pi 5; RePlayOS does not support ZIP archives
+        // for this system.
+        extensions: &["elf", "iso", "cso", "prx", "pbp", "chd"],
         launchbox_platforms: &["Sony PSP"],
         hidden: false,
         uses_megabit: false,
@@ -1767,6 +1770,18 @@ mod tests {
         assert!(stv.uses_megabit);
         assert!(!stv.hidden);
         assert_eq!(stv.thumbnail_repos, &["MAME"]);
+    }
+
+    #[test]
+    fn psp_is_registered_with_replayos_formats() {
+        let psp = find_system("sony_psp").expect("sony_psp must be in SYSTEMS");
+        assert_eq!(psp.display_name, "PlayStation Portable");
+        assert_eq!(psp.category, SystemCategory::Handheld);
+        assert_eq!(psp.extensions, &["elf", "iso", "cso", "prx", "pbp", "chd"]);
+        assert_eq!(psp.launchbox_platforms, &["Sony PSP"]);
+        assert_eq!(psp.thumbnail_repos, &["Sony - PlayStation Portable"]);
+        assert!(psp.has_retroachievements);
+        assert!(psp.core_supports_retroachievements);
     }
 
     #[test]

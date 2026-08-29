@@ -67,6 +67,20 @@ pub fn collect_all_repos() -> Vec<RepoInfo> {
     repos
 }
 
+#[cfg(test)]
+mod collect_all_repos_tests {
+    use super::*;
+
+    #[test]
+    fn includes_playstation_portable() {
+        assert!(
+            collect_all_repos()
+                .iter()
+                .any(|repo| repo.display_name == "Sony - PlayStation Portable")
+        );
+    }
+}
+
 /// Hardcoded default branch lookup. Most repos use `master`; a few use `main`.
 pub fn default_branch(repo_display_name: &str) -> &'static str {
     match repo_display_name {
