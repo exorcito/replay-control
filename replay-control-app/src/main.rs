@@ -1050,6 +1050,11 @@ mod ssr {
         server_fn::axum::register_explicit::<replay_control_app::server_fns::SetGameStatus>();
         server_fn::axum::register_explicit::<replay_control_app::server_fns::ClearGameStatus>();
         server_fn::axum::register_explicit::<replay_control_app::server_fns::GetGamesByStatus>();
+        server_fn::axum::register_explicit::<replay_control_app::server_fns::GetGameAchievements>();
+        server_fn::axum::register_explicit::<replay_control_app::server_fns::CheckGameAchievements>();
+        server_fn::axum::register_explicit::<replay_control_app::server_fns::SearchRaGamesApi>();
+        server_fn::axum::register_explicit::<replay_control_app::server_fns::GetRaApiKey>();
+        server_fn::axum::register_explicit::<replay_control_app::server_fns::SaveRaApiKey>();
     }
 
     pub async fn run() {
