@@ -879,5 +879,12 @@ pub fn translate(key: Key) -> &'static str {
         Key::StorageProblem => {
             "ストレージの問題: {0}。利用可能な場合、Replay Control は引き続き最後にアクティブだったストレージを使用します。"
         }
+        // Game notes
+        Key::GameNotesTitle => "メモ",
+        Key::GameNotesPlaceholder => "このゲームについてのメモを追加...",
+        Key::GameNotesSave => "保存",
+        Key::GameNotesSaving => "保存中...",
+        Key::GameNotesSaved => "保存しました",
+        Key::GameNotesError => "メモの保存に失敗しました。",
     }
 }
