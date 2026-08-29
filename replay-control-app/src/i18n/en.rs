@@ -888,5 +888,13 @@ pub fn translate(key: Key) -> &'static str {
         Key::GameNotesSaving => "Saving...",
         Key::GameNotesSaved => "Saved",
         Key::GameNotesError => "Failed to save note.",
+        // HowLongToBeat
+        Key::HltbTitle => "How Long to Beat",
+        Key::HltbFetch => "Look up completion time",
+        Key::HltbFetching => "Fetching...",
+        Key::HltbNoData => "No data found on HowLongToBeat",
+        Key::HltbMain => "Main Story",
+        Key::HltbMainExtra => "Main + Extras",
+        Key::HltbCompletionist => "Completionist",
     }
 }

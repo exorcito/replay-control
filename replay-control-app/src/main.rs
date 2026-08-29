@@ -1044,6 +1044,7 @@ mod ssr {
         server_fn::axum::register_explicit::<replay_control_app::server_fns::GetGameNote>();
         server_fn::axum::register_explicit::<replay_control_app::server_fns::SetGameNote>();
         server_fn::axum::register_explicit::<replay_control_app::server_fns::ClearGameNote>();
+        server_fn::axum::register_explicit::<replay_control_app::server_fns::GetHltbData>();
     }
 
     pub async fn run() {

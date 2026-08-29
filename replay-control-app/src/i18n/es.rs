@@ -900,5 +900,13 @@ pub fn translate(key: Key) -> &'static str {
         Key::GameNotesSaving => "Guardando...",
         Key::GameNotesSaved => "Guardado",
         Key::GameNotesError => "No se pudo guardar la nota.",
+        // HowLongToBeat
+        Key::HltbTitle => "Cuánto dura",
+        Key::HltbFetch => "Buscar duración",
+        Key::HltbFetching => "Buscando...",
+        Key::HltbNoData => "Sin datos en HowLongToBeat",
+        Key::HltbMain => "Historia principal",
+        Key::HltbMainExtra => "Historia + extras",
+        Key::HltbCompletionist => "Completista",
     }
 }

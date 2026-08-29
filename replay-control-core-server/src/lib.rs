@@ -26,6 +26,7 @@ pub use db_pool::{DbError, DbPool};
 pub mod capture;
 pub use capture::screenshots;
 
+pub mod hltb;
 pub mod http;
 
 pub mod update;
