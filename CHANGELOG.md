@@ -6,9 +6,17 @@ Chronological timeline of changes to the Replay Control companion app for RePlay
 
 ## [Unreleased]
 
+---
+
+## [1.2.0]
+
+> Validated Sony PSP support, RePlayOS 1.8 skin compatibility, and broader, more accurate arcade hardware browsing.
+
 ### Added
 
 - Arcade board browsing now recognizes Psikyo, Psikyo SH-2, Sega Y Board, SSV, Kaneko Super Nova System, and Sega System SP hardware. (#147)
+- **Sony PlayStation Portable support.** Put PSP games (`.elf`, `.iso`, `.cso`, `.prx`, `.pbp`, or `.chd`) in the `sony_psp` ROM folder to browse them with box art, metadata, manuals, and the PSP system icon. Compressed `.zip` archives must be extracted first.
+- **RetroAchievements for PSP.** Clean UMD dumps are identified at scan time using RetroAchievements' hashing recipe. Modified dumps, such as decrypted rips, do not match, consistent with on-device achievement clients.
 
 ### Changed
 
