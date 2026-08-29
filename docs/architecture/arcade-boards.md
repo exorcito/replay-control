@@ -4,7 +4,7 @@ How arcade games are attributed to a hardware board, stored, and surfaced.
 
 ## The `ArcadeBoard` type
 
-`ArcadeBoard` (in `replay-control-core::arcade_board`, wasm-safe core) is a `Copy` enum with one variant per tracked board (CPS-1/2/3, Neo Geo MVS, the Sega System / Model families, Taito F2/F3/Z, IGS PGM, Cave, Midway, Namco System, Konami, Data East, Irem, Jaleco). Selection is **curated**: a board earns a variant only when it groups *several* games — single-game drivers, and per-maker gambling / mahjong driver families, are deliberately left out so a board page surfaces a family of titles rather than a lone game. Each variant exposes:
+`ArcadeBoard` (in `replay-control-core::arcade_board`, wasm-safe core) is a `Copy` enum with one variant per tracked board (CPS-1/2/3, Neo Geo MVS, the Sega System / Model families, Psikyo, SSV, Kaneko Super Nova, Taito F2/F3/Z, IGS PGM, Cave, Midway, Namco System, Konami, Data East, Irem, Jaleco). Selection is **curated**: a board earns a variant only when it groups *several* games — single-game drivers, and per-maker gambling / mahjong driver families, are deliberately left out so a board page surfaces a family of titles rather than a lone game. Each variant exposes:
 
 - `as_tag()` — stable ASCII slug stored in the databases and used in `/board/:tag` URLs (e.g. `cps2`, `neogeo_mvs`).
 - `from_tag()` — inverse, for deserializing the stored slug.
@@ -33,9 +33,11 @@ Invariants are test-pinned: every spelling round-trips to its board, and no spel
 | MAME 0.285 (`mame0285-arcade.xml`) | **Yes** — the extract keeps the `sourcefile` attribute | MAME-current `manufacturer/board.cpp` |
 | MAME 2003+ (`mame2003plus.xml`) | Yes | legacy `board.c` |
 | FBNeo (`fbneo-arcade.dat`) | Yes | `dir/d_board.cpp` |
-| Flycast (Naomi CSV) | n/a | board derived from the `GDS-` / `GDL-` display-name prefix via `flycast_board()` |
+| Flycast (Naomi CSV) | n/a | explicit board tag curated per ROM from the MAME 0.285 Naomi, Naomi 2, Atomiswave, and System SP machine declarations |
 
 `board_tag_from_sourcefile()` normalizes the one parser-shape quirk `from_sourcefile()` doesn't model — `normalize_sourcefile()` strips the FBNeo `d_` basename prefix — then defers to `ArcadeBoard::from_sourcefile()`. The legacy `.c` and canonical `.cpp` forms match verbatim against the `sourcefiles()` table. There is no separate legacy-to-canonical map; all spellings live on the enum.
+
+The Flycast CSV is different because Naomi-family games share driver files and product-code prefixes do not identify the hardware reliably. Its committed `board` column is therefore authoritative; catalog builds fail when a row omits the field or uses an unknown tag. Refresh it from the matching MAME machine declarations rather than inferring the board from `GDS` or `GDL` text.
 
 ## Runtime merge — board has its own priority
 

@@ -56,9 +56,18 @@ pub enum ArcadeBoard {
     SegaModel2,
     SegaModel3,
     SegaStv,
+    SegaYBoard,
     SegaNaomi,
     SegaNaomi2,
+    SegaSystemSp,
     SammyAtomiswave,
+    // Psikyo
+    Psikyo,
+    PsikyoSh2,
+    // Seta
+    SetaSsv,
+    // Kaneko
+    KanekoSuperNova,
     // Taito
     TaitoF2,
     TaitoF3,
@@ -125,9 +134,15 @@ impl ArcadeBoard {
         ArcadeBoard::SegaModel2,
         ArcadeBoard::SegaModel3,
         ArcadeBoard::SegaStv,
+        ArcadeBoard::SegaYBoard,
         ArcadeBoard::SegaNaomi,
         ArcadeBoard::SegaNaomi2,
+        ArcadeBoard::SegaSystemSp,
         ArcadeBoard::SammyAtomiswave,
+        ArcadeBoard::Psikyo,
+        ArcadeBoard::PsikyoSh2,
+        ArcadeBoard::SetaSsv,
+        ArcadeBoard::KanekoSuperNova,
         ArcadeBoard::TaitoF2,
         ArcadeBoard::TaitoF3,
         ArcadeBoard::TaitoZ,
@@ -183,9 +198,15 @@ impl ArcadeBoard {
             ArcadeBoard::SegaModel2 => "sega_model_2",
             ArcadeBoard::SegaModel3 => "sega_model_3",
             ArcadeBoard::SegaStv => "sega_stv",
+            ArcadeBoard::SegaYBoard => "sega_y_board",
             ArcadeBoard::SegaNaomi => "sega_naomi",
             ArcadeBoard::SegaNaomi2 => "sega_naomi_2",
+            ArcadeBoard::SegaSystemSp => "sega_system_sp",
             ArcadeBoard::SammyAtomiswave => "sammy_atomiswave",
+            ArcadeBoard::Psikyo => "psikyo",
+            ArcadeBoard::PsikyoSh2 => "psikyo_sh2",
+            ArcadeBoard::SetaSsv => "seta_ssv",
+            ArcadeBoard::KanekoSuperNova => "kaneko_super_nova",
             ArcadeBoard::TaitoF2 => "taito_f2",
             ArcadeBoard::TaitoF3 => "taito_f3",
             ArcadeBoard::TaitoZ => "taito_z",
@@ -240,9 +261,15 @@ impl ArcadeBoard {
             ArcadeBoard::SegaModel2 => "Model 2",
             ArcadeBoard::SegaModel3 => "Model 3",
             ArcadeBoard::SegaStv => "ST-V",
+            ArcadeBoard::SegaYBoard => "Y Board",
             ArcadeBoard::SegaNaomi => "Naomi",
             ArcadeBoard::SegaNaomi2 => "Naomi 2",
+            ArcadeBoard::SegaSystemSp => "System SP",
             ArcadeBoard::SammyAtomiswave => "Atomiswave",
+            ArcadeBoard::Psikyo => "Psikyo",
+            ArcadeBoard::PsikyoSh2 => "Psikyo SH-2",
+            ArcadeBoard::SetaSsv => "SSV",
+            ArcadeBoard::KanekoSuperNova => "Super Nova System",
             ArcadeBoard::TaitoF2 => "F2 System",
             ArcadeBoard::TaitoF3 => "F3 System",
             ArcadeBoard::TaitoZ => "Z System",
@@ -296,9 +323,14 @@ impl ArcadeBoard {
             | ArcadeBoard::SegaModel2
             | ArcadeBoard::SegaModel3
             | ArcadeBoard::SegaStv
+            | ArcadeBoard::SegaYBoard
             | ArcadeBoard::SegaNaomi
-            | ArcadeBoard::SegaNaomi2 => "Sega",
+            | ArcadeBoard::SegaNaomi2
+            | ArcadeBoard::SegaSystemSp => "Sega",
             ArcadeBoard::SammyAtomiswave => "Sammy",
+            ArcadeBoard::Psikyo | ArcadeBoard::PsikyoSh2 => "Psikyo",
+            ArcadeBoard::SetaSsv => "Seta",
+            ArcadeBoard::KanekoSuperNova => "Kaneko",
             ArcadeBoard::TaitoF2
             | ArcadeBoard::TaitoF3
             | ArcadeBoard::TaitoZ
@@ -362,8 +394,8 @@ impl ArcadeBoard {
     /// - MAME 2003+ legacy bare `board.c` (e.g. `pgm.c`, `system16.c`)
     ///
     /// Callers strip the one parser-shape quirk this table doesn't model — the
-    /// FBNeo `d_` basename prefix — *before* lookup. (Flycast doesn't go through
-    /// here at all: it maps its CSV directly to a variant via `flycast_board`.)
+    /// FBNeo `d_` basename prefix — *before* lookup. Flycast carries an explicit
+    /// board tag in its curated CSV and does not use sourcefile resolution.
     pub const fn sourcefiles(self) -> &'static [&'static str] {
         match self {
             ArcadeBoard::Cps1 => &["capcom/cps1.cpp", "cps1.c"],
@@ -385,9 +417,17 @@ impl ArcadeBoard {
             ArcadeBoard::SegaModel2 => &["sega/model2.cpp"],
             ArcadeBoard::SegaModel3 => &["sega/model3.cpp"],
             ArcadeBoard::SegaStv => &["sega/stv.cpp"],
+            ArcadeBoard::SegaYBoard => &["sega/segaybd.cpp"],
             ArcadeBoard::SegaNaomi => &["sega/naomi.cpp"],
             ArcadeBoard::SegaNaomi2 => &["sega/naomi2.cpp"],
+            ArcadeBoard::SegaSystemSp => &["sega/segasp.cpp"],
             ArcadeBoard::SammyAtomiswave => &["sega/atomiswave.cpp", "sega/dc_atomiswave.cpp"],
+            ArcadeBoard::Psikyo => &["psikyo/psikyo.cpp", "psikyo.c"],
+            ArcadeBoard::PsikyoSh2 => &["psikyo/psikyosh.cpp", "psikyosh.c"],
+            ArcadeBoard::SetaSsv => &["seta/ssv.cpp", "pst90s/ssv.cpp", "ssv.c"],
+            ArcadeBoard::KanekoSuperNova => {
+                &["kaneko/suprnova.cpp", "pst90s/suprnova.cpp", "suprnova.c"]
+            }
             ArcadeBoard::TaitoF2 => &["taito/taitof2.cpp", "taito/taito_f2.cpp", "taito_f2.c"],
             ArcadeBoard::TaitoF3 => &["taito/taitof3.cpp", "taito/taito_f3.cpp", "taito_f3.c"],
             ArcadeBoard::TaitoZ => &["taito/taito_z.cpp", "taito/taitoz.cpp"],
@@ -723,6 +763,18 @@ mod tests {
             ("taito_f2.c", TaitoF2),
             ("taito_f3.c", TaitoF3),
             ("sega/dc_atomiswave.cpp", SammyAtomiswave),
+            ("sega/segasp.cpp", SegaSystemSp),
+            ("sega/segaybd.cpp", SegaYBoard),
+            ("psikyo/psikyo.cpp", Psikyo),
+            ("psikyo.c", Psikyo),
+            ("psikyo/psikyosh.cpp", PsikyoSh2),
+            ("psikyosh.c", PsikyoSh2),
+            ("seta/ssv.cpp", SetaSsv),
+            ("pst90s/ssv.cpp", SetaSsv),
+            ("ssv.c", SetaSsv),
+            ("kaneko/suprnova.cpp", KanekoSuperNova),
+            ("pst90s/suprnova.cpp", KanekoSuperNova),
+            ("suprnova.c", KanekoSuperNova),
             // Midway units — FBNeo drops the "mid" prefix; 2003+ uses legacy .c.
             ("midway/yunit.cpp", MidwayYUnit),
             ("midway/tunit.cpp", MidwayTUnit),

@@ -41,7 +41,7 @@ Both rotate, so they change as you reload and as your library grows.
 
 ## Coverage and Accuracy
 
-Board identification covers the curated arcade boards across MAME, FBNeo, and Flycast (Naomi / Atomiswave). Not every arcade game maps to a known board — only the boards Replay Control tracks are labelled; everything else simply has no board shown.
+Board identification covers the curated arcade boards across MAME, FBNeo, and Flycast, including Naomi, Naomi 2, Atomiswave, System SP, Psikyo, Psikyo SH-2, Sega Y Board, SSV, and Kaneko Super Nova System. Not every arcade game maps to a known board — only the boards Replay Control tracks are labelled; everything else simply has no board shown.
 
 Game counts on board pages, pills, and the search blocks count distinct titles and exclude clones, translations, hacks, and special versions, so they line up with what you'd expect from the original release set.
 

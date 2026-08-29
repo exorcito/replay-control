@@ -105,7 +105,18 @@ fn board_tokens(board: ArcadeBoard) -> Vec<String> {
         ],
         ArcadeBoard::SegaNaomi => &["naomi"],
         ArcadeBoard::SegaNaomi2 => &["naomi 2", "naomi2"],
+        ArcadeBoard::SegaSystemSp => &["system sp", "systemsp", "sega system sp"],
         ArcadeBoard::SammyAtomiswave => &["atomiswave", "aw"],
+        ArcadeBoard::Psikyo => &["psikyo"],
+        ArcadeBoard::PsikyoSh2 => &["psikyo sh2", "psikyo sh-2", "psikyosh"],
+        ArcadeBoard::SegaYBoard => &["y board", "y-board", "sega y board"],
+        ArcadeBoard::SetaSsv => &["ssv", "seta ssv"],
+        ArcadeBoard::KanekoSuperNova => &[
+            "super nova system",
+            "supernova system",
+            "suprnova",
+            "kaneko super nova",
+        ],
         ArcadeBoard::TaitoF2 => &["taito f2", "f2"],
         ArcadeBoard::TaitoF3 => &["taito f3", "f3"],
         ArcadeBoard::TaitoGNet => &["g-net", "gnet", "g net", "taito g-net", "taito gnet"],
@@ -388,6 +399,21 @@ mod tests {
             Some(ArcadeBoard::MidwayVegas)
         );
         assert_eq!(r("gaelco 3d").filters.board, Some(ArcadeBoard::Gaelco3d));
+    }
+
+    #[test]
+    fn issue_147_boards_recognized() {
+        let cases = [
+            ("Psikyo", ArcadeBoard::Psikyo),
+            ("Psikyo SH-2", ArcadeBoard::PsikyoSh2),
+            ("Sega Y Board", ArcadeBoard::SegaYBoard),
+            ("SSV", ArcadeBoard::SetaSsv),
+            ("Kaneko Super Nova", ArcadeBoard::KanekoSuperNova),
+        ];
+
+        for (query, expected) in cases {
+            assert_eq!(r(query).filters.board, Some(expected), "{query}");
+        }
     }
 
     #[test]

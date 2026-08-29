@@ -263,9 +263,9 @@ fn merge_for_system(rom_name: &str, rows: &SourceRows, system: &str) -> ArcadeGa
     // not follow, say, `arcade_mame`'s "MAME first" preference. FBNeo is
     // Replay's primary arcade core and carries the richest board coverage,
     // so it outranks MAME 2003+ (legacy, enabled only on older Pis). MAME
-    // 0.285's compact XML has no `sourcefile`, so it never contributes a
-    // board. Naomi leads because GD-ROM board hints (Naomi / Naomi 2 /
-    // Atomiswave) live only in that source.
+    // 0.285 sits last. Flycast leads because its curated CSV explicitly splits
+    // Naomi, Naomi 2, Atomiswave, and System SP, which share driver families in
+    // MAME's sourcefile data.
     const BOARD_PRIORITY: &[ArcadeSource] = &[
         ArcadeSource::Naomi,
         ArcadeSource::Fbneo,
@@ -645,6 +645,24 @@ mod tests {
             .expect("kofxi should exist (Atomiswave)");
         assert_eq!(info.display_name, "The King of Fighters XI");
         assert_eq!(info.year, "2005");
+        assert_eq!(info.board, Some(ArcadeBoard::SammyAtomiswave));
+    }
+
+    #[tokio::test]
+    async fn flycast_uses_explicit_board_data() {
+        init_test_catalog().await;
+        let cases = [
+            ("mslug6", ArcadeBoard::SammyAtomiswave),
+            ("vstrik3c", ArcadeBoard::SegaNaomi2),
+            ("vtennisg", ArcadeBoard::SegaNaomi),
+        ];
+
+        for (rom_name, expected_board) in cases {
+            let info = lookup_arcade_game("arcade_dc", rom_name)
+                .await
+                .unwrap_or_else(|| panic!("{rom_name} should exist"));
+            assert_eq!(info.board, Some(expected_board), "{rom_name}");
+        }
     }
 
     #[tokio::test]

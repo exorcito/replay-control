@@ -266,19 +266,6 @@ fn normalize_sourcefile(raw: &str) -> String {
     raw.to_string()
 }
 
-/// Derive an `ArcadeBoard` for a Flycast CSV entry, whose `display_name`
-/// carries the board hint in a `GDS-` (Naomi 2) / `GDL-` (Atomiswave) prefix.
-/// Default → Naomi 1.
-fn flycast_board(display_name: &str) -> ArcadeBoard {
-    if display_name.contains("GDS-") {
-        ArcadeBoard::SegaNaomi2
-    } else if display_name.contains("GDL-") {
-        ArcadeBoard::SammyAtomiswave
-    } else {
-        ArcadeBoard::SegaNaomi
-    }
-}
-
 // =============================================================================
 // Arcade parsers
 // =============================================================================
@@ -304,7 +291,10 @@ fn parse_csv(path: &Path) -> Vec<ArcadeEntry> {
         let players: u8 = record.get(4).unwrap_or("0").parse().unwrap_or(0);
         let is_clone = record.get(7).unwrap_or("false") == "true";
         let display_name = record.get(1).unwrap_or("").to_string();
-        let board = flycast_board(&display_name).as_tag().to_string();
+        let board_tag = record.get(10).unwrap_or("");
+        let board = ArcadeBoard::from_tag(board_tag).unwrap_or_else(|| {
+            panic!("Flycast CSV row for {rom_name} has unknown or missing board tag {board_tag:?}")
+        });
         entries.push(ArcadeEntry {
             rom_name,
             display_name,
@@ -317,7 +307,7 @@ fn parse_csv(path: &Path) -> Vec<ArcadeEntry> {
             is_bios: false,
             parent: record.get(8).unwrap_or("").to_string(),
             category: record.get(9).unwrap_or("").to_string(),
-            board,
+            board: board.as_tag().to_string(),
         });
     }
     entries
@@ -3450,6 +3440,32 @@ mod tests {
         path
     }
 
+    #[test]
+    fn flycast_csv_reads_explicit_board_tag() {
+        let path = write_temp_file(
+            "flycast.csv",
+            "rom_name,display_name,year,manufacturer,players,rotation,status,is_clone,parent,category,board\n\
+             vtennisg,Virtua Tennis,2001,Sega,2,0,good,false,,,sega_naomi\n",
+        );
+
+        let entries = parse_csv(&path);
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].board, ArcadeBoard::SegaNaomi.as_tag());
+        fs::remove_dir_all(path.parent().unwrap()).unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "unknown or missing board tag")]
+    fn flycast_csv_rejects_missing_board_tag() {
+        let path = write_temp_file(
+            "flycast.csv",
+            "rom_name,display_name,year,manufacturer,players,rotation,status,is_clone,parent,category,board\n\
+             broken,Broken,2001,Sega,2,0,good,false,,,\n",
+        );
+
+        let _ = parse_csv(&path);
+    }
+
     /// Materialize a complete, valid source tree from `REQUIRED_SOURCES`:
     /// a non-empty file for every `File`, and a dir holding one non-empty
     /// matching entry for every `Dir`.
@@ -4084,10 +4100,10 @@ mod registry_drift_tests {
                     missing.push(format!("{}: MiSTer repo {repo}", sys.folder_name));
                 }
             }
-            if let Some(folder) = sys.retrokit_manuals_folder {
-                if !script.contains(folder) {
-                    missing.push(format!("{}: retrokit folder {folder}", sys.folder_name));
-                }
+            if let Some(folder) = sys.retrokit_manuals_folder
+                && !script.contains(folder)
+            {
+                missing.push(format!("{}: retrokit folder {folder}", sys.folder_name));
             }
         }
         assert!(
