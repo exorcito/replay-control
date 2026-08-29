@@ -23,7 +23,7 @@ pub async fn get_stats_dashboard()
 
     for sys_stat in &mut systems {
         let system = sys_stat.system.clone();
-        let favs = state.cache.get_favorites_set(&storage, &system).await;
+        let favs = state.library.get_favorites_set(&storage, &system).await;
         sys_stat.favorite_count = favs.len();
         total_favorites += favs.len();
     }
