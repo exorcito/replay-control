@@ -383,6 +383,7 @@ fn is_user_read_server_function(function: &str) -> bool {
             // Read-only: the update banner (shown to every user, not just
             // admins) renders the "what's new" changelog from this.
             | "get_update_changelog"
+            | "get_hltb_data"
     )
 }
 
