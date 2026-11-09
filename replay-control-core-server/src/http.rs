@@ -5,6 +5,7 @@
 use std::net::{IpAddr, ToSocketAddrs};
 use std::sync::OnceLock;
 
+use reqwest::header::{ACCEPT, ACCEPT_LANGUAGE, HeaderMap, HeaderValue};
 use replay_control_core::error::{Error, Result};
 
 static CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
@@ -147,11 +148,20 @@ fn ssrf_guarded_client() -> &'static reqwest::Client {
     })
 }
 
-/// Shared HTTP client with sensible defaults (User-Agent, timeouts, connection pooling).
+/// Shared HTTP client with browser-like headers (User-Agent, Accept) for Cloudflare compatibility.
 pub fn shared_client() -> &'static reqwest::Client {
     CLIENT.get_or_init(|| {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            ACCEPT,
+            HeaderValue::from_static(
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            ),
+        );
+        headers.insert(ACCEPT_LANGUAGE, HeaderValue::from_static("en-US,en;q=0.5"));
         reqwest::Client::builder()
-            .user_agent("replay-control")
+            .user_agent("Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+            .default_headers(headers)
             .connect_timeout(std::time::Duration::from_secs(10))
             .timeout(std::time::Duration::from_secs(30))
             .pool_max_idle_per_host(4)
@@ -188,6 +198,22 @@ pub async fn get_bytes_with_timeout(url: &str, timeout: std::time::Duration) -> 
         .await
         .map(|b| b.to_vec())
         .map_err(|e| Error::Other(format!("Failed to read response body from {url}: {e}")))
+}
+
+/// GET a URL with custom timeout and return raw text.
+pub async fn get_text_with_timeout(url: &str, timeout: std::time::Duration) -> Result<String> {
+    let resp = shared_client()
+        .get(url)
+        .timeout(timeout)
+        .send()
+        .await
+        .map_err(|e| Error::Other(format!("HTTP request failed for {url}: {e}")))?
+        .error_for_status()
+        .map_err(|e| Error::Other(format!("HTTP error for {url}: {e}")))?;
+
+    resp.text()
+        .await
+        .map_err(|e| Error::Other(format!("Failed to read response text from {url}: {e}")))
 }
 
 /// GET a URL with custom timeout and parse as JSON.
