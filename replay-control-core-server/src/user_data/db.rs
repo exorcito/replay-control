@@ -196,7 +196,8 @@ impl UserDataDb {
                     main_extra_secs INTEGER,
                     completionist_secs INTEGER,
                     fetched_at INTEGER NOT NULL
-                );",
+                );
+
                 CREATE TABLE IF NOT EXISTS game_status (
                     system TEXT NOT NULL,
                     rom_filename TEXT NOT NULL,
@@ -799,34 +800,6 @@ impl UserDataDb {
 
     /// Store a HLTB result in the cache, overwriting any previous entry.
     pub fn set_hltb_cache(conn: &Connection, base_title: &str, data: &HltbData) -> Result<()> {
-    /// Get the play status for a single game.
-    pub fn get_game_status(
-        conn: &Connection,
-        system: &str,
-        rom_filename: &str,
-    ) -> Result<Option<GameStatus>> {
-        let result = conn
-            .query_row(
-                "SELECT status FROM game_status WHERE system = ?1 AND rom_filename = ?2",
-                params![system, rom_filename],
-                |row| row.get::<_, String>(0),
-            )
-            .optional()
-            .map_err(|e| Error::Other(format!("Failed to query game_status: {e}")))?;
-
-        match result {
-            Some(s) => Ok(GameStatus::from_str(&s)),
-            None => Ok(None),
-        }
-    }
-
-    /// Set or update the status for a game.
-    pub fn set_game_status(
-        conn: &Connection,
-        system: &str,
-        rom_filename: &str,
-        status: GameStatus,
-    ) -> Result<()> {
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
@@ -866,6 +839,40 @@ impl UserDataDb {
         Ok(())
     }
 
+    /// Get the play status for a single game.
+    pub fn get_game_status(
+        conn: &Connection,
+        system: &str,
+        rom_filename: &str,
+    ) -> Result<Option<GameStatus>> {
+        let result = conn
+            .query_row(
+                "SELECT status FROM game_status WHERE system = ?1 AND rom_filename = ?2",
+                params![system, rom_filename],
+                |row| row.get::<_, String>(0),
+            )
+            .optional()
+            .map_err(|e| Error::Other(format!("Failed to query game_status: {e}")))?;
+
+        match result {
+            Some(s) => Ok(GameStatus::from_str(&s)),
+            None => Ok(None),
+        }
+    }
+
+    /// Set or update the status for a game.
+    pub fn set_game_status(
+        conn: &Connection,
+        system: &str,
+        rom_filename: &str,
+        status: GameStatus,
+    ) -> Result<()> {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs() as i64;
+
+        conn.execute(
             "INSERT OR REPLACE INTO game_status (system, rom_filename, status, updated_at)
              VALUES (?1, ?2, ?3, ?4)",
             params![system, rom_filename, status.as_str(), now],
@@ -930,6 +937,9 @@ impl UserDataDb {
         );
         let _ = conn.execute(
             "DELETE FROM game_note WHERE system = ?1 AND rom_filename = ?2",
+            params![system, rom_filename],
+        );
+        let _ = conn.execute(
             "DELETE FROM game_status WHERE system = ?1 AND rom_filename = ?2",
             params![system, rom_filename],
         );
@@ -966,6 +976,8 @@ impl UserDataDb {
             params![system, old_filename, new_filename],
         ) {
             tracing::warn!("Failed to update game_note: {e}");
+        }
+        if let Err(e) = conn.execute(
             "UPDATE game_status SET rom_filename = ?3 WHERE system = ?1 AND rom_filename = ?2",
             params![system, old_filename, new_filename],
         ) {
