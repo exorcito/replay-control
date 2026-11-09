@@ -8,6 +8,7 @@ pub mod replay_api;
 pub mod replay_settings;
 pub mod runtime_env;
 pub mod search_scoring;
+pub mod stats;
 pub mod storage_id;
 pub mod update;
 
